@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   Search,
   UploadCloud,
-  ScanLine,
   Lock,
   Shield,
   Globe,
@@ -24,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 const LandingPage = () => {
   const { t } = useTranslation();
   const { scrollY } = useScroll();
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
   const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
   const y2 = useTransform(scrollY, [0, 1000], [0, -150]);
 
@@ -106,30 +106,19 @@ const LandingPage = () => {
             variants={itemVars}
             className="flex items-center justify-center gap-4 mt-6 whitespace-nowrap"
           >
-            <Link to="/verify" className="flex-shrink-0">
-              <Button
-                size="lg"
-                className="h-12 px-6 text-sm flex items-center gap-2 rounded-xl whitespace-nowrap"
-              >
-                <span className="flex items-center gap-2 whitespace-nowrap">
-                  {t('landing.ctaLaunch')}
-                  <ArrowRight className="h-4 w-4 flex-shrink-0" />
-                </span>
-              </Button>
-            </Link>
-
-            <Link to="/fraud-scan" className="flex-shrink-0">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="h-12 px-5 text-sm flex items-center gap-2 rounded-xl whitespace-nowrap bg-[var(--theme-surface)]/80 backdrop-blur-sm"
-              >
-                <span className="flex items-center gap-2 whitespace-nowrap">
-                  <ScanLine className="h-4 w-4 flex-shrink-0" />
-                  {t('landing.ctaScanner')}
-                </span>
-              </Button>
-            </Link>
+            {userInfo && (
+                <Link to="/verify" className="flex-shrink-0">
+                  <Button
+                    size="lg"
+                    className="h-12 px-6 text-sm flex items-center gap-2 rounded-xl whitespace-nowrap"
+                  >
+                    <span className="flex items-center gap-2 whitespace-nowrap">
+                      Verify Certificate
+                      <ArrowRight className="h-4 w-4 flex-shrink-0" />
+                    </span>
+                  </Button>
+                </Link>
+            )}
           </motion.div>
 
           <motion.div variants={itemVars} className="mt-12 flex flex-wrap justify-center gap-8 text-xs font-bold text-[var(--theme-text-muted)] tracking-widest uppercase">
@@ -240,12 +229,12 @@ const LandingPage = () => {
               >
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <Lock className="h-5 w-5 flex-shrink-0" />
-                  {t('landing.ctaSection.admin')}
+                  Login
                 </span>
               </Button>
             </Link>
 
-            <Link to="/verify" className="flex justify-center">
+            <Link to="/register" className="flex justify-center">
               <Button
                 size="lg"
                 variant="secondary"
@@ -253,7 +242,7 @@ const LandingPage = () => {
               >
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-                  {t('landing.ctaSection.check')}
+                  Register
                 </span>
               </Button>
             </Link>

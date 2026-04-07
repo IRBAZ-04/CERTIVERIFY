@@ -22,22 +22,22 @@ const resources = {
         badge: 'Next-Gen Architecture',
         headlineMain: 'Verify credentials with',
         headlineAccent: 'absolute certainty',
-        subtext: 'AI-powered certificate verification with real-time fraud detection. Issue, verify, and protect credentials at global scale.',
+        subtext: 'Secure certificate issuance and verification for learners and organizations, backed by dependable digital records.',
         ctaLaunch: 'Launch Platform',
-        ctaScanner: 'AI Fraud Scanner',
+        ctaScanner: 'Upload & Verify',
         badges: {
           secured: 'SHA-256 Secured',
           qr: 'QR Verified',
-          ai: 'AI Detection',
+          ai: 'Trusted Verification',
           multi: 'Multi-Org'
         },
         marquee: {
           verify: 'CERTIFICATE VERIFICATION',
-          fraud: 'FRAUD DETECTION',
+          fraud: 'SECURE ISSUANCE',
           qr: 'QR CODE SCANNING',
           instant: 'INSTANT RESULTS',
           multi: 'MULTI-ORG SUPPORT',
-          analytics: 'REAL-TIME ANALYTICS'
+          analytics: 'SECURE RECORDS'
         },
         features: {
           badge: 'Enterprise Features',
@@ -49,8 +49,8 @@ const resources = {
               desc: 'Verify credentials in milliseconds with ultra-secure validation architecture.'
             },
             fraud: {
-              title: 'AI Fraud Detection',
-              desc: 'Identify forged metrics, tampered logos, and unauthorized edits using Vision AI.'
+              title: 'Secure Issuance',
+              desc: 'Create certificates with reliable data validation and trusted record keeping.'
             },
             qr: {
               title: 'QR Code Validation',
@@ -71,7 +71,7 @@ const resources = {
           }
         },
         ctaSection: {
-          title: 'Ready to completely eliminate fraud?',
+          title: 'Ready to secure every certificate?',
           admin: 'Admin Dashboard',
           check: 'Check a Certificate'
         }
@@ -99,7 +99,7 @@ const resources = {
           title: 'Recent Certificates',
           id: 'Certificate ID',
           student: 'Student',
-          domain: 'Domain',
+          domain: 'Course',
           validity: 'Validity',
           actions: 'Actions',
           empty: 'No certificates found',
@@ -109,8 +109,8 @@ const resources = {
           title: 'Create New Certificate',
           certId: 'Certificate ID',
           student: 'Recipient Name',
-          domain: 'Course / Domain',
-          start: 'Start Date',
+          domain: 'Course',
+          start: 'Date',
           end: 'End Date',
           cancel: 'Cancel',
           generate: 'Generate Certificate'
@@ -151,7 +151,7 @@ const resources = {
           valid: 'Verified Authentic',
           validDesc: 'This is an official certificate record.',
           holder: 'Certificate Holder',
-          domain: 'Domain',
+          domain: 'Course',
           id: 'Certificate ID',
           validity: 'Validity',
           org: 'Issuing Organization',
@@ -217,7 +217,7 @@ const resources = {
       },
       footer: {
         brand: 'CertiVerify',
-        desc: 'Certificate verification and fraud detection platform. Built for trust, speed, and modern digital credentials.',
+        desc: 'Certificate verification and issuance platform built for trust, reliability, and modern digital credentials.',
         product: 'Product',
         legal: 'Legal',
         privacy: 'Privacy Policy',
@@ -246,22 +246,22 @@ const resources = {
         badge: 'अगली पीढ़ी का आर्किटेक्चर',
         headlineMain: 'प्रमाण-पत्रों को सत्यापित करें',
         headlineAccent: 'पूर्ण निश्चितता के साथ',
-        subtext: 'रीयल-टाइम धोखाधड़ी पहचान के साथ AI-संचालित प्रमाण-पत्र सत्यापन। वैश्विक स्तर पर प्रमाण-पत्रों को जारी करें, सत्यापित करें और सुरक्षित करें।',
+        subtext: 'विश्वसनीय डिजिटल रिकॉर्ड के साथ शिक्षार्थियों और संगठनों के लिए सुरक्षित प्रमाण-पत्र जारी करना और सत्यापन।',
         ctaLaunch: 'प्लेटफॉर्म लॉन्च करें',
-        ctaScanner: 'AI धोखाधड़ी स्कैनर',
+        ctaScanner: 'अपलोड और सत्यापित करें',
         badges: {
           secured: 'SHA-256 सुरक्षित',
           qr: 'QR सत्यापित',
-          ai: 'AI पहचान',
+          ai: 'विश्वसनीय सत्यापन',
           multi: 'मल्टी-ऑर्ग'
         },
         marquee: {
           verify: 'प्रमाण-पत्र सत्यापन',
-          fraud: 'धोखाधड़ी पहचान',
+          fraud: 'सुरक्षित जारी करना',
           qr: 'QR कोड स्कैनिंग',
           instant: 'तत्काल परिणाम',
           multi: 'मल्टी-ऑर्ग समर्थन',
-          analytics: 'रीयल-टाइम एनालिटिक्स'
+          analytics: 'सुरक्षित रिकॉर्ड'
         },
         features: {
           badge: 'एंटरप्राइज विशेषताएं',
@@ -273,8 +273,8 @@ const resources = {
               desc: 'अल्ट्रा-सुरक्षित सत्यापन आर्किटेक्चर के साथ मिलीसेकंड में प्रमाण-पत्र सत्यापित करें।'
             },
             fraud: {
-              title: 'AI धोखाधड़ी पहचान',
-              desc: 'Vision AI का उपयोग करके जाली मेट्रिक्स, छेड़छाड़ किए गए लोगो और अनधिकृत संपादन की पहचान करें।'
+              title: 'सुरक्षित जारी करना',
+              desc: 'विश्वसनीय डेटा सत्यापन और भरोसेमंद रिकॉर्ड कीपिंग के साथ प्रमाण-पत्र बनाएं।'
             },
             qr: {
               title: 'QR कोड सत्यापन',
@@ -295,7 +295,7 @@ const resources = {
           }
         },
         ctaSection: {
-          title: 'धोखाधड़ी को पूरी तरह से समाप्त करने के लिए तैयार हैं?',
+          title: 'हर प्रमाण-पत्र को सुरक्षित करने के लिए तैयार हैं?',
           admin: 'एडमिन डैशबोर्ड',
           check: 'प्रमाण-पत्र की जाँच करें'
         }
@@ -323,7 +323,7 @@ const resources = {
           title: 'हाल के प्रमाण-पत्र',
           id: 'प्रमाण-पत्र ID',
           student: 'छात्र',
-          domain: 'डोमेन',
+          domain: 'कोर्स',
           validity: 'वैधता',
           actions: 'कार्रवाई',
           empty: 'कोई प्रमाण-पत्र नहीं मिला',
@@ -375,7 +375,7 @@ const resources = {
           valid: 'प्रामाणिकता की पुष्टि',
           validDesc: 'यह एक आधिकारिक प्रमाण-पत्र रिकॉर्ड है।',
           holder: 'प्रमाण-पत्र धारक',
-          domain: 'डोमेन',
+          domain: 'कोर्स',
           id: 'प्रमाण-पत्र ID',
           validity: 'वैधता',
           org: 'जारी करने वाला संगठन',
@@ -441,7 +441,7 @@ const resources = {
       },
       footer: {
         brand: 'CertiVerify',
-        desc: 'प्रमाण-पत्र सत्यापन और धोखाधड़ी पहचान प्लेटफॉर्म। विश्वास, गति और आधुनिक डिजिटल क्रेडेंशियल के लिए निर्मित।',
+        desc: 'विश्वास, विश्वसनीयता, और आधुनिक डिजिटल क्रेडेंशियल के लिए निर्मित प्रमाण-पत्र सत्यापन और जारी करने वाला प्लेटफॉर्म।',
         product: 'उत्पाद',
         legal: 'कानूनी',
         privacy: 'गोपनीयता नीति',

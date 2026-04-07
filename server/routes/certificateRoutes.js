@@ -5,39 +5,19 @@ const {
     createCertificate,
     getCertificates,
     verifyCertificate,
-    getStudentPortfolio,
-    shareCertificate,
-    ocrVerify,
-    getAnalytics,
-    updateCertificate,
-    deleteCertificate
+    downloadCertificate
 } = require('../controllers/certificateController');
-const { protect, requireAdmin } = require('../middlewares/authMiddleware');
-const uploadExcel = require('../middlewares/uploadMiddleware');
-const uploadImage = require('../middlewares/imageUploadMiddleware');
+const { protect, adminOnly } = require('../middlewares/authMiddleware');
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" }); // Temp folder
 
-// Analytics (must be before /:id routes)
-router.get('/analytics', protect, requireAdmin, getAnalytics);
+router.get('/verify/:id', protect, verifyCertificate);
+router.get('/download/:id', protect, downloadCertificate);
 
-// AI Fraud OCR (public — anyone can scan)
-router.post('/ocr', uploadImage.single('image'), ocrVerify);
-
-// Public verification routes
-router.get('/verify/:id', verifyCertificate);
-router.get('/student/:name', getStudentPortfolio);
-
-// Protected CRUD
 router.route('/')
-    .get(protect, requireAdmin, getCertificates)
-    .post(protect, requireAdmin, createCertificate);
+    .get(protect, adminOnly, getCertificates)
+    .post(protect, adminOnly, createCertificate);
 
-router.post('/upload', protect, requireAdmin, uploadExcel.single('file'), uploadCertificates);
-
-router.route('/:id')
-    .put(protect, requireAdmin, updateCertificate)
-    .delete(protect, requireAdmin, deleteCertificate);
-
-// Share via email
-router.post('/:id/share', protect, requireAdmin, shareCertificate);
+router.post('/upload', protect, adminOnly, upload.single('file'), uploadCertificates);
 
 module.exports = router;

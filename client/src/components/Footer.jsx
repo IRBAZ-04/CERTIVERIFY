@@ -9,10 +9,9 @@ const Footer = () => {
 
   const links = {
     product: [
-      { label: t('footer.product'), to: '/verify' },
-      { label: t('nav.aiScan'), to: '/fraud-scan' },
-      { label: t('nav.portfolio'), to: '/portfolio' },
-      { label: t('nav.login'), to: '/login' },
+      { label: t('nav.verify'), to: '/verify' },
+      { label: t('nav.signIn'), to: '/login' },
+      { label: t('login.signUp'), to: '/register' }
     ],
     legal: [
       { label: t('footer.privacy'), to: '#' },

@@ -1,86 +1,62 @@
 const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs"); // Note: using bcryptjs as installed heavily already
 
-// @desc    Register new user (Orgs defaults)
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        let { name, email, password, adminPasscode } = req.body;
+        email = email.toLowerCase();
+        
+        // Ensure first user is admin, or explicitly requested via passcode
+        const usersCount = await User.countDocuments({});
+        const role = (usersCount === 0 || adminPasscode === 'admin123') ? 'admin' : 'user';
 
-        const userExists = await User.findOne({ email });
+        const hashed = await bcrypt.hash(password, 10);
+        const user = await User.create({ name, email, password: hashed, role });
 
-        if (userExists) {
-            return res.status(400).json({ message: 'Email already registered' });
-        }
-
-        const user = await User.create({
-            name,
-            email,
-            password,
-            role: role || 'ORG_ADMIN'
-        });
-
-        if (user) {
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id)
-            });
-        } else {
-            res.status(400).json({ message: 'Invalid user data' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
+        
+        res.json({ token, role: user.role, name: user.name });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
 };
 
-// @desc    Auth user & get token
-// @route   POST /api/auth/login
-// @access  Public
-const authUser = async (req, res) => {
+const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
+        let { email, password } = req.body;
+        email = email.toLowerCase();
         const user = await User.findOne({ email });
-
-        if (user && (await user.matchPassword(password))) {
-            if (user.status !== 'ACTIVE') {
-                return res.status(403).json({ message: 'Account is not active' });
-            }
-
-            res.json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id)
-            });
-        } else {
-            res.status(401).json({ message: 'Invalid email or password' });
+        
+        if (!user) {
+            console.log(`[Login Failed] User not found for email: ${email}`);
+            return res.status(401).json({ message: "Invalid credentials" });
         }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) {
+            console.log(`[Login Failed] Password mismatch for email: ${email}. Provided password length: ${password?.length}, stored password length: ${user.password?.length}`);
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
+        res.json({ token, role: user.role, name: user.name });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
-// @desc    Get user profile
-// @route   GET /api/auth/me
-// @access  Private
-const getUserProfile = async (req, res) => {
+const logoutUser = (req, res) => {
+    res.json({ message: 'Logged out successfully' });
+};
+
+const getUsers = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select('-password');
-
-        if (user) {
-            res.json(user);
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        const users = await User.find({}).select('-password');
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
-module.exports = { registerUser, authUser, getUserProfile };
+module.exports = { registerUser, loginUser, logoutUser, getUsers };

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Download, Trash2, FileSpreadsheet, Loader2, AlertCircle, Plus, LayoutDashboard, Activity, FileText, Database, ShieldAlert } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Upload, Download, FileSpreadsheet, Loader2, AlertCircle, Plus, FileText, Database, Users } from 'lucide-react';
 import API from '../services/api';
 import Sidebar from '../components/ui/Sidebar';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -13,11 +12,17 @@ import { useTranslation } from 'react-i18next';
 const Dashboard = () => {
     const { t } = useTranslation();
     const [certificates, setCertificates] = useState([]);
-    const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [file, setFile] = useState(null);
+    const [uploadReport, setUploadReport] = useState(null);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(true);
+    const [creatingUser, setCreatingUser] = useState(false);
+    const [updatingUserId, setUpdatingUserId] = useState(null);
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'USER' });
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [singleData, setSingleData] = useState({ certificateId: '', studentName: '', domain: '', startDate: '', endDate: '' });
@@ -25,28 +30,36 @@ const Dashboard = () => {
 
     const navigate = useNavigate();
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    const canCreateSuperAdmin = userInfo.role === 'SUPER_ADMIN';
 
     useEffect(() => {
         if (!userInfo.token) {
             navigate('/login');
-        } else {
-            fetchData();
+            return;
         }
+        if (userInfo.role === 'USER') {
+            setLoading(false);
+            return;
+        }
+        fetchData();
+        fetchUsers();
     }, [navigate]);
+
+    const showMessage = (type, text) => {
+        setMessage({ type, text });
+        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    };
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [certRes, analyticsRes] = await Promise.all([
-                API.get('/certificates'),
-                API.get('/certificates/analytics')
-            ]);
-            setCertificates(certRes.data);
-            setAnalytics(analyticsRes.data);
+            const { data } = await API.get('/certificates');
+            setCertificates(data);
         } catch (err) {
             if (err.response?.status === 401) {
                 localStorage.removeItem('userInfo');
                 navigate('/login');
+                return;
             }
             showMessage('error', t('dashboard.messages.loadFail'));
         } finally {
@@ -54,9 +67,21 @@ const Dashboard = () => {
         }
     };
 
-    const showMessage = (type, text) => {
-        setMessage({ type, text });
-        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    const fetchUsers = async () => {
+        try {
+            setUsersLoading(true);
+            const { data } = await API.get('/auth/users');
+            setUsers(data);
+        } catch (err) {
+            if (err.response?.status === 401) {
+                localStorage.removeItem('userInfo');
+                navigate('/login');
+                return;
+            }
+            showMessage('error', err.response?.data?.message || 'Failed to load users.');
+        } finally {
+            setUsersLoading(false);
+        }
     };
 
     const handleUpload = async (e) => {
@@ -67,16 +92,19 @@ const Dashboard = () => {
         formData.append('file', file);
 
         setUploading(true);
+        setUploadReport(null);
         try {
             const { data } = await API.post('/certificates/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            showMessage('success', t('dashboard.messages.success'));
+            setUploadReport(data);
+            showMessage('success', data.message || 'Upload completed.');
             setFile(null);
             document.getElementById('file-upload').value = '';
             fetchData();
         } catch (err) {
-            showMessage('error', t('dashboard.messages.uploadFail'));
+            setUploadReport(err.response?.data?.rejectedRows ? err.response.data : null);
+            showMessage('error', err.response?.data?.message || t('dashboard.messages.uploadFail'));
         } finally {
             setUploading(false);
         }
@@ -92,28 +120,86 @@ const Dashboard = () => {
             setSingleData({ certificateId: '', studentName: '', domain: '', startDate: '', endDate: '' });
             fetchData();
         } catch (err) {
-            showMessage('error', t('dashboard.messages.loadFail'));
+            showMessage('error', err.response?.data?.message || t('dashboard.messages.loadFail'));
         } finally {
             setCreating(false);
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm(t('dashboard.messages.deleted'))) {
-            try {
-                await API.delete(`/certificates/${id}`);
-                showMessage('success', t('dashboard.messages.deleted'));
-                fetchData();
-            } catch (err) {
-                showMessage('error', t('dashboard.messages.deleteFail'));
-            }
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        setCreatingUser(true);
+        try {
+            await API.post('/auth/users', newUser);
+            showMessage('success', 'Account created successfully.');
+            setNewUser({ name: '', email: '', password: '', role: 'USER' });
+            fetchUsers();
+        } catch (err) {
+            showMessage('error', err.response?.data?.message || 'Failed to create account.');
+        } finally {
+            setCreatingUser(false);
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('userInfo');
-        navigate('/login');
+    const handleUpdateUser = async (user) => {
+        setUpdatingUserId(user._id);
+        try {
+            await API.patch(`/auth/users/${user._id}`, {
+                name: user.name,
+                role: user.role,
+                status: user.status
+            });
+            showMessage('success', 'Account updated.');
+            fetchUsers();
+        } catch (err) {
+            showMessage('error', err.response?.data?.message || 'Failed to update account.');
+        } finally {
+            setUpdatingUserId(null);
+        }
     };
+
+    const handleLogout = async () => {
+        try {
+            await API.post('/auth/logout');
+        } catch {
+            // Ignore network/logout failures and always clear local session.
+        } finally {
+            localStorage.removeItem('userInfo');
+            navigate('/login');
+        }
+    };
+
+    const totalCertificates = certificates.length;
+    const validCertificates = certificates.filter((cert) => cert.status === 'VALID').length;
+    const revokedCertificates = certificates.filter((cert) => cert.status === 'REVOKED').length;
+
+    if (userInfo.role === 'USER') {
+        return (
+            <div className="min-h-[calc(100vh-8rem)] py-20 px-4 bg-[var(--theme-background)] flex flex-col items-center justify-center">
+                <div className="max-w-md w-full text-center space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="h-20 w-20 mx-auto rounded-3xl bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shadow-[var(--theme-shadow-sm)] border border-[var(--theme-accent-primary)]/20">
+                        <Users className="h-10 w-10 text-[var(--theme-accent-primary)]" />
+                    </div>
+                    <h1 className="text-3xl font-black tracking-tight text-[var(--theme-text-primary)]">
+                        Welcome, {userInfo.name}
+                    </h1>
+                    <p className="text-lg text-[var(--theme-text-secondary)]">
+                        Access your certificate verification and downloads securely from our central portal.
+                    </p>
+                    <div className="pt-4">
+                        <Button size="lg" className="w-full text-lg h-14 rounded-2xl shadow-[var(--theme-shadow-md)]" onClick={() => navigate('/verify')}>
+                            Go to Search Certificate Page
+                        </Button>
+                    </div>
+                    <div className="pt-2">
+                         <Button variant="outline" size="sm" onClick={handleLogout}>
+                             {t('nav.logout')}
+                         </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-[var(--theme-background)]">
@@ -150,53 +236,29 @@ const Dashboard = () => {
                         </div>
                     )}
 
-                    {/* Analytics */}
-                    {!loading && analytics && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card className="lg:col-span-2">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Activity className="h-5 w-5 text-[var(--theme-accent-primary)]" />
-                                        {t('dashboard.analytics.activity')}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="h-72">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={analytics.overview} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                            <XAxis dataKey="name" stroke="var(--theme-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                                            <YAxis stroke="var(--theme-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                                            <Tooltip contentStyle={{ backgroundColor: 'var(--theme-surface)', border: '1px solid var(--theme-border)', borderRadius: '12px', boxShadow: 'var(--theme-shadow-md)' }} cursor={{ fill: 'var(--theme-hover-surface)' }} />
-                                            <Bar dataKey="issued" fill="var(--theme-accent-primary)" radius={[4, 4, 0, 0]} barSize={32} />
-                                            <Bar dataKey="verified" fill="var(--theme-success-text)" radius={[4, 4, 0, 0]} barSize={32} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
+                    {!loading && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card>
+                                <CardContent className="p-6">
+                                    <p className="text-sm text-[var(--theme-text-secondary)]">Total Certificates</p>
+                                    <p className="text-4xl font-bold text-[var(--theme-text-primary)] mt-2">{totalCertificates}</p>
                                 </CardContent>
                             </Card>
-
-                            <div className="flex flex-col gap-6">
-                                <Card className="flex-1 flex flex-col justify-center">
-                                    <CardContent className="p-6 text-center">
-                                        <div className="mx-auto h-12 w-12 rounded-full bg-[var(--theme-accent-soft-bg)] flex items-center justify-center mb-4">
-                                            <FileText className="h-6 w-6 text-[var(--theme-accent-primary)]" />
-                                        </div>
-                                        <p className="text-sm font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">{t('dashboard.analytics.total')}</p>
-                                        <p className="text-5xl font-bold text-[var(--theme-text-primary)] tracking-tight">{analytics.totalCertificates}</p>
-                                    </CardContent>
-                                </Card>
-                                <Card className="flex-1 flex flex-col justify-center relative overflow-hidden bg-[var(--theme-error-bg)]/20 border-[var(--theme-error-border)]/50">
-                                    <CardContent className="p-6 text-center relative z-10">
-                                        <div className="mx-auto h-12 w-12 rounded-full bg-[var(--theme-error-bg)] flex items-center justify-center mb-4">
-                                            <ShieldAlert className="h-6 w-6 text-[var(--theme-error-text)]" />
-                                        </div>
-                                        <p className="text-sm font-medium text-[var(--theme-error-text)] uppercase tracking-wider mb-2">{t('dashboard.analytics.fraud')}</p>
-                                        <p className="text-5xl font-bold text-[var(--theme-error-text)] tracking-tight">{analytics.fraudAttempts}</p>
-                                    </CardContent>
-                                </Card>
-                            </div>
+                            <Card>
+                                <CardContent className="p-6">
+                                    <p className="text-sm text-[var(--theme-text-secondary)]">Valid</p>
+                                    <p className="text-4xl font-bold text-[var(--theme-success-text)] mt-2">{validCertificates}</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardContent className="p-6">
+                                    <p className="text-sm text-[var(--theme-text-secondary)]">Revoked</p>
+                                    <p className="text-4xl font-bold text-[var(--theme-error-text)] mt-2">{revokedCertificates}</p>
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
 
-                    {/* Actions */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card hover>
                             <CardHeader>
@@ -225,6 +287,20 @@ const Dashboard = () => {
                                         {t('dashboard.actions.process')}
                                     </Button>
                                 </form>
+                                {uploadReport?.summary && (
+                                    <div className="mt-4 rounded-lg border border-[var(--theme-border)] p-3 text-sm">
+                                        <p className="font-medium text-[var(--theme-text-primary)]">
+                                            Processed: {uploadReport.summary.inserted} inserted, {uploadReport.summary.rejected} rejected
+                                        </p>
+                                        {uploadReport.rejectedRows?.length > 0 && (
+                                            <div className="mt-2 max-h-40 overflow-auto text-[var(--theme-text-secondary)]">
+                                                {uploadReport.rejectedRows.slice(0, 10).map((row) => (
+                                                    <p key={`reject-${row.row}`}>Row {row.row}: {row.reasons.join(', ')}</p>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -249,7 +325,8 @@ const Dashboard = () => {
                         </Card>
                     </div>
 
-                    {/* Table */}
+
+
                     <Card className="overflow-hidden border-0 shadow-md ring-1 ring-[var(--theme-border)]">
                         <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-[var(--theme-border)] bg-[var(--theme-surface)]/50">
                             <h2 className="text-xl font-semibold text-[var(--theme-text-primary)]">{t('dashboard.table.title')}</h2>
@@ -300,9 +377,6 @@ const Dashboard = () => {
                                                         }}>
                                                             <Download className="h-4 w-4 shrink-0" />
                                                             <span className="sr-only sm:not-sr-only sm:ml-2">PDF</span>
-                                                        </Button>
-                                                        <Button variant="outline" size="icon" onClick={() => handleDelete(cert._id)} className="border-transparent hover:border-[var(--theme-error-border)] hover:bg-[var(--theme-error-bg)] hover:text-[var(--theme-error-text)]">
-                                                            <Trash2 className="h-4 w-4" />
                                                         </Button>
                                                     </div>
                                                 </td>

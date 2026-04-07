@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, User, ShieldAlert, Sparkles } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Lock, Mail, ShieldAlert, Sparkles } from 'lucide-react';
 import API from '../services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -9,8 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const LoginPage = () => {
     const { t } = useTranslation();
-    const [isLogin, setIsLogin] = useState(true);
-    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -21,14 +20,16 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            const endpoint = isLogin ? '/auth/login' : '/auth/register';
-            const payload = isLogin
-                ? { email: formData.email, password: formData.password }
-                : formData;
-
-            const { data } = await API.post(endpoint, payload);
+            const { data } = await API.post('/auth/login', {
+                email: formData.email,
+                password: formData.password
+            });
             localStorage.setItem('userInfo', JSON.stringify(data));
-            navigate('/dashboard');
+            if (data.role === 'user') {
+                navigate('/user-dashboard');
+            } else {
+                navigate('/admin-dashboard');
+            }
         } catch (err) {
             setError(err.response?.data?.message || t('login.authFail'));
         } finally {
@@ -45,10 +46,10 @@ const LoginPage = () => {
                             <Sparkles className="h-6 w-6 text-[var(--theme-button-primary-text)]" />
                         </div>
                         <CardTitle className="text-xl">
-                            {isLogin ? t('login.welcome') : t('login.create')}
+                            {t('login.welcome')}
                         </CardTitle>
                         <CardDescription>
-                            {isLogin ? t('login.welcomeSub') : t('login.createSub')}
+                            {t('login.welcomeSub')}
                         </CardDescription>
                     </CardHeader>
 
@@ -61,20 +62,6 @@ const LoginPage = () => {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {!isLogin && (
-                                <div>
-                                    <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">{t('login.name')}</label>
-                                    <Input
-                                        type="text"
-                                        required
-                                        icon={User}
-                                        placeholder={t('login.namePlaceholder')}
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    />
-                                </div>
-                            )}
-
                             <div>
                                 <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">{t('login.email')}</label>
                                 <Input
@@ -104,19 +91,16 @@ const LoginPage = () => {
                                 className="w-full"
                                 loading={loading}
                             >
-                                {isLogin ? t('login.signIn') : t('login.create')}
+                                Login
                             </Button>
                         </form>
                     </CardContent>
 
                     <CardFooter className="justify-center">
-                        <button
-                            onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                            className="text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
-                        >
-                            {isLogin ? t('login.noAccount') : t('login.hasAccount')}
-                            <span className="text-[var(--theme-accent-primary)] ml-1">{isLogin ? t('login.signUp') : t('login.signIn')}</span>
-                        </button>
+                        <p className="text-sm text-[var(--theme-text-secondary)]">
+                            No account?
+                            <Link to="/register" className="text-[var(--theme-accent-primary)] ml-1">Register</Link>
+                        </p>
                     </CardFooter>
                 </Card>
             </div>

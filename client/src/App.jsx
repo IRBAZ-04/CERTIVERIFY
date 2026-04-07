@@ -7,10 +7,11 @@ import Footer from './components/Footer';
 import CustomCursor from './components/ui/CustomCursor';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
-import Dashboard from './pages/Dashboard';
+import RegisterPage from './pages/RegisterPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import ExcelUploadPage from './pages/ExcelUploadPage';
 import VerifyPage from './pages/VerifyPage';
-import FraudScanPage from './pages/FraudScanPage';
-import StudentPortfolioPage from './pages/StudentPortfolioPage';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -28,11 +29,13 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/user-dashboard" element={<UserDashboardPage />} />
+          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+          <Route path="/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/upload-excel" element={<ExcelUploadPage />} />
+          <Route path="/search" element={<VerifyPage />} />
           <Route path="/verify" element={<VerifyPage />} />
-          <Route path="/fraud-scan" element={<FraudScanPage />} />
-          <Route path="/portfolio/:name" element={<StudentPortfolioPage />} />
-          <Route path="/portfolio" element={<StudentPortfolioPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

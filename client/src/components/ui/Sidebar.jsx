@@ -1,19 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Search,
-  ShieldCheck,
-  Users,
-  FileText
+  Search
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const sidebarItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/verify', label: 'Verify', icon: Search },
-  { to: '/fraud-scan', label: 'AI Scan', icon: ShieldCheck },
-  { to: '/portfolio', label: 'Portfolio', icon: Users },
-  { to: '/certificate', label: 'Certificates', icon: FileText }
+  { to: '/verify', label: 'Verify', icon: Search }
 ];
 
 export default function Sidebar() {
