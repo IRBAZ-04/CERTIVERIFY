@@ -18,7 +18,11 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan('dev'));
 
 // Body parsers
-app.use(cors());
+app.use(cors({
+  origin: "*", // allow all (for now)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
