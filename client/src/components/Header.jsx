@@ -43,7 +43,7 @@ const Header = () => {
                     <div className="flex items-center justify-between h-16">
 
                         <Link to="/" className="flex items-center gap-3 group shrink-0">
-                            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] flex items-center justify-center shadow-md">
+                            <div className="h-9 w-9 rounded-lg bg-[var(--theme-accent-primary)] flex items-center justify-center shadow-sm">
                                 <ShieldCheck className="h-5 w-5 text-white" />
                             </div>
                             <span className="font-semibold text-lg text-[var(--theme-text-primary)] tracking-tight hidden sm:block">

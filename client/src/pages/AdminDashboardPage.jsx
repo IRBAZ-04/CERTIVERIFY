@@ -105,7 +105,7 @@ const AdminDashboardPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] mx-auto mb-4 flex items-center justify-center shadow-lg">
+          <div className="h-14 w-14 rounded-2xl bg-[var(--theme-accent-primary)] mx-auto mb-4 flex items-center justify-center shadow-sm">
             <ShieldCheck className="h-7 w-7 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-[var(--theme-text-primary)] tracking-tight">Admin Dashboard</h1>

@@ -33,7 +33,7 @@ const VerifyPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <Card className="p-10 text-center max-w-md w-full">
-                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] mx-auto mb-5 flex items-center justify-center shadow-lg">
+                        <div className="h-16 w-16 rounded-2xl bg-[var(--theme-accent-primary)] mx-auto mb-5 flex items-center justify-center shadow-sm">
                             <Shield className="h-8 w-8 text-white" />
                         </div>
                         <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] mb-2">Access Restricted</h2>

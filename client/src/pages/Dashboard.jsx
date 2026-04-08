@@ -202,7 +202,7 @@ const Dashboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="max-w-md w-full text-center space-y-6"
                 >
-                    <div className="h-20 w-20 mx-auto rounded-2xl bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] flex items-center justify-center shadow-lg">
+                    <div className="h-20 w-20 mx-auto rounded-2xl bg-[var(--theme-accent-primary)] flex items-center justify-center shadow-sm">
                         <Users className="h-10 w-10 text-white" />
                     </div>
                     <h1 className="text-3xl font-bold text-[var(--theme-text-primary)]">

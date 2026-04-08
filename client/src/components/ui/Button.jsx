@@ -42,7 +42,7 @@ const Button = React.forwardRef(({
     sm: 'h-8 px-3 text-xs rounded-lg',
     default: 'h-10 px-4 py-2 text-sm rounded-xl',
     lg: 'h-12 px-6 text-base rounded-xl',
-    xl: 'h-14 px-10 text-base rounded-xl',
+    xl: 'h-14 px-10 text-base rounded-lg',
     icon: 'h-10 w-10 p-0 rounded-xl',
     'icon-sm': 'h-8 w-8 p-0 rounded-lg',
   };

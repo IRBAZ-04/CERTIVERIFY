@@ -27,7 +27,7 @@ const UserDashboardPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] mx-auto mb-5 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-[var(--theme-accent-primary)] mx-auto mb-5 flex items-center justify-center shadow-sm">
             <Award className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-[var(--theme-text-primary)]">Welcome, {userInfo?.name}</h1>

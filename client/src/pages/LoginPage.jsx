@@ -118,7 +118,7 @@ const LoginPage = () => {
                         <Card className="w-full">
                             <CardContent className="p-8">
                                 <div className="lg:hidden text-center mb-8">
-                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[var(--theme-accent-primary)] to-[var(--theme-accent-hover)] mx-auto mb-4 flex items-center justify-center shadow-lg">
+                                    <div className="h-12 w-12 rounded-xl bg-[var(--theme-accent-primary)] mx-auto mb-4 flex items-center justify-center shadow-sm">
                                         <ShieldCheck className="h-6 w-6 text-white" />
                                     </div>
                                     <h2 className="text-2xl font-bold text-[var(--theme-text-primary)]">
