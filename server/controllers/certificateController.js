@@ -13,15 +13,23 @@ const uploadCertificates = async (req, res) => {
         let rejected = 0;
 
         for (let row of data) {
-            if (!row.CertificateID) {
+            const certId = row.CertificateID?.toString().trim();
+            if (!certId) {
                 rejected++;
                 continue;
             }
 
             try {
+                // Check if already exists to provide better feedback
+                const existing = await Certificate.findOne({ certId });
+                if (existing) {
+                    rejected++;
+                    continue;
+                }
+
                 await Certificate.create({
                     name: row.Name,
-                    certId: row.CertificateID,
+                    certId: certId,
                     course: row.Course,
                     date: row.Date
                 });
@@ -42,17 +50,47 @@ const createCertificate = async (req, res) => {
         const { name, certId, course, date } = req.body;
         if (!name || !certId || !course) return res.status(400).json({ message: "Missing fields" });
 
-        const newCert = await Certificate.create({ name, certId, course, date });
+        const existing = await Certificate.findOne({ certId: certId.trim() });
+        if (existing) {
+            return res.status(400).json({ message: "Certificate ID already exists" });
+        }
+
+        const newCert = await Certificate.create({ name, certId: certId.trim(), course, date });
         res.status(201).json(newCert);
     } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ message: "Certificate ID already exists" });
+        }
         res.status(400).json({ message: err.message });
     }
 };
 
 const getCertificates = async (req, res) => {
     try {
-        const certs = await Certificate.find({});
-        res.json(certs);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || "";
+
+        let query = {};
+        if (search) {
+            query = {
+                $or: [
+                    { name: { $regex: search, $options: "i" } },
+                    { certId: { $regex: search, $options: "i" } },
+                    { course: { $regex: search, $options: "i" } }
+                ]
+            };
+        }
+
+        const total = await Certificate.countDocuments(query);
+        const certificates = await Certificate.find(query)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const totalPages = Math.ceil(total / limit);
+
+        res.json({ certificates, total, page, totalPages, limit });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

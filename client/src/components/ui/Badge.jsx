@@ -17,6 +17,8 @@ const Badge = ({
       'bg-[var(--theme-error-bg)] text-[var(--theme-error-text)] border border-[var(--theme-error-border)]',
     info:
       'bg-[var(--theme-surface)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]',
+    gold:
+      'bg-[var(--theme-accent-gold-soft-bg)] text-[var(--theme-accent-gold)] border border-[var(--theme-accent-gold)]/30',
   };
 
   const icons = {
@@ -31,13 +33,13 @@ const Badge = ({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-md transition-all duration-200 hover:scale-[1.03]',
+        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200',
         styles[variant],
         className
       )}
       {...props}
     >
-      {icon && <Icon className="h-3.5 w-3.5 opacity-80" />}
+      {icon && Icon && <Icon className="h-3.5 w-3.5" />}
       {children}
     </span>
   );

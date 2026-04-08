@@ -25,11 +25,9 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Remove existing theme classes
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
 
-    // Set CSS custom properties for both legacy and new theme variables
     const colors = currentTheme.colors;
     const typography = currentTheme.typography;
 
@@ -42,7 +40,7 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--bg-base', colors.background);
     root.style.setProperty('--bg-surface', colors.surface);
     root.style.setProperty('--bg-card', colors.surface);
-    root.style.setProperty('--bg-input', colors.input.bg);
+    root.style.setProperty('--bg-input', colors.input?.bg || colors.surface);
     root.style.setProperty('--bg-hover', colors.hoverSurface);
 
     root.style.setProperty('--text-primary', colors.text.primary);
@@ -64,26 +62,39 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--theme-accent-hover', colors.accent.hover);
     root.style.setProperty('--theme-accent-active', colors.accent.active);
     root.style.setProperty('--theme-accent-soft-bg', colors.accent.softBg);
+    
+    // Gold colors
+    root.style.setProperty('--theme-accent-gold', colors.accent.gold || '#D97706');
+    root.style.setProperty('--theme-accent-gold-hover', colors.accent.goldHover || '#B45309');
+    root.style.setProperty('--theme-accent-gold-soft-bg', colors.accent.goldSoftBg || '#FEF3C7');
 
     root.style.setProperty('--theme-error-text', colors.error.text);
     root.style.setProperty('--theme-error-bg', colors.error.bg);
     root.style.setProperty('--theme-error-border', colors.error.border);
-    root.style.setProperty('--error', colors.error.bg);
 
     root.style.setProperty('--theme-success-text', colors.success.text);
     root.style.setProperty('--theme-success-bg', colors.success.bg);
     root.style.setProperty('--theme-success-border', colors.success.border);
-    root.style.setProperty('--success', colors.success.bg);
 
     root.style.setProperty('--theme-warning-text', colors.warning.text);
     root.style.setProperty('--theme-warning-bg', colors.warning.bg);
     root.style.setProperty('--theme-warning-border', colors.warning.border);
-    root.style.setProperty('--warning', colors.warning.bg);
 
     root.style.setProperty('--theme-button-primary-bg', colors.button.primary.bg);
     root.style.setProperty('--theme-button-primary-hover', colors.button.primary.hover);
     root.style.setProperty('--theme-button-primary-active', colors.button.primary.active);
     root.style.setProperty('--theme-button-primary-text', colors.button.primary.text);
+
+    // Gold button
+    if (colors.button.gold) {
+      root.style.setProperty('--theme-button-gold-bg', colors.button.gold.bg);
+      root.style.setProperty('--theme-button-gold-hover', colors.button.gold.hover);
+      root.style.setProperty('--theme-button-gold-text', colors.button.gold.text);
+    } else {
+      root.style.setProperty('--theme-button-gold-bg', '#D97706');
+      root.style.setProperty('--theme-button-gold-hover', '#B45309');
+      root.style.setProperty('--theme-button-gold-text', '#FFFFFF');
+    }
 
     root.style.setProperty('--theme-button-secondary-bg', colors.button.secondary.bg);
     root.style.setProperty('--theme-button-secondary-border', colors.button.secondary.border);
@@ -99,6 +110,7 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--theme-shadow-sm', currentTheme.shadows.sm);
     root.style.setProperty('--theme-shadow-md', currentTheme.shadows.md);
     root.style.setProperty('--theme-shadow-lg', currentTheme.shadows.lg);
+    root.style.setProperty('--theme-shadow-xl', currentTheme.shadows.xl || currentTheme.shadows.lg);
     root.style.setProperty('--theme-border-radius', currentTheme.borderRadius);
 
     root.style.setProperty('--theme-font-family', typography.fontFamily);
@@ -111,17 +123,14 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--theme-font-size-3xl', typography.fontSize['3xl']);
     root.style.setProperty('--theme-font-size-4xl', typography.fontSize['4xl']);
     root.style.setProperty('--theme-font-size-5xl', typography.fontSize['5xl']);
-
     root.style.setProperty('--theme-font-weight-normal', typography.fontWeight.normal);
     root.style.setProperty('--theme-font-weight-medium', typography.fontWeight.medium);
     root.style.setProperty('--theme-font-weight-semibold', typography.fontWeight.semibold);
     root.style.setProperty('--theme-font-weight-bold', typography.fontWeight.bold);
-
     root.style.setProperty('--theme-line-height-tight', typography.lineHeight.tight);
     root.style.setProperty('--theme-line-height-normal', typography.lineHeight.normal);
     root.style.setProperty('--theme-line-height-relaxed', typography.lineHeight.relaxed);
 
-    // Store theme preference
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme, currentTheme]);
 
