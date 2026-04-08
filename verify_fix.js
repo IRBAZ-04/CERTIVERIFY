@@ -1,6 +1,7 @@
 async function verifyFix() {
     console.log("Verifying fix for flexible certificate issuance...");
-    const url = 'http://localhost:5000/api';
+    const url = 'https://certiverify-backend.onrender.com/api';    
+
     
     // 1. Register a new admin (using admin passcode)
     let res = await fetch(`${url}/auth/register`, {

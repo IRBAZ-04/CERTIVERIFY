@@ -1,6 +1,7 @@
 async function runFlow() {
     console.log("Starting Flow Check...");
-    const url = 'http://localhost:5000/api';
+    const url = 'https://certiverify-backend.onrender.com/api';    
+
     
     // 1. Clear DB (using a hacky way since we don't have a direct clear endpoint, but wait, we can't easily clear the DB via HTTP. The first user might not be admin if the DB isn't empty! Let's just create a mock user and see what role we get, or just test login if they exist)
     // Actually, I can just connect to Mongoose and clear the DB here for a pristine test!

@@ -1,6 +1,7 @@
 async function verifyDownload() {
     console.log("Verifying backend download endpoint...");
-    const url = 'http://localhost:5000/api';
+    const url = 'https://certiverify-backend.onrender.com/api';    
+
     
     // 1. Register a new admin to get a token
     let res = await fetch(`${url}/auth/register`, {
