@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, CheckCircle2, XCircle, User, Award, Loader2, Shield, Download, ShieldCheck } from 'lucide-react';
 import API from '../services/api';
+import { downloadCertificatePDF } from '../utils/downloadUtils';
 import { Card, CardContent } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -152,16 +153,7 @@ const VerifyPage = () => {
                                             <p className="font-semibold text-[var(--theme-success-text)] text-lg">{t('verify.results.valid')}</p>
                                             <p className="text-sm text-[var(--theme-text-secondary)]">{t('verify.results.validDesc')}</p>
                                         </div>
-                                        <Button variant="gold" size="sm" onClick={async () => {
-                                            const res = await API.get(`/certificates/download/${result.cert.certId}`, { responseType: 'blob' });
-                                            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
-                                            const link = document.createElement('a');
-                                            link.href = url;
-                                            link.setAttribute('download', `${result.cert.certId}.pdf`);
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            link.remove();
-                                        }} className="shrink-0">
+                                        <Button variant="gold" size="sm" onClick={() => downloadCertificatePDF(result.cert.certId)} className="shrink-0">
                                             Download
                                             <Download className="h-4 w-4 ml-2" />
                                         </Button>

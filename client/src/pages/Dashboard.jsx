@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Download, FileSpreadsheet, Loader2, AlertCircle, Plus, FileText, Database, Users, ShieldCheck, Award, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import API from '../services/api';
+import { downloadCertificatePDF } from '../utils/downloadUtils';
 import Sidebar from '../components/ui/Sidebar';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -32,7 +33,7 @@ const Dashboard = () => {
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'USER' });
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [singleData, setSingleData] = useState({ certificateId: '', studentName: '', domain: '', startDate: '', endDate: '' });
+    const [singleData, setSingleData] = useState({ certId: '', name: '', course: '', date: '' });
     const [creating, setCreating] = useState(false);
 
     const navigate = useNavigate();
@@ -138,7 +139,7 @@ const Dashboard = () => {
             await API.post('/certificates', singleData);
             showMessage('success', t('dashboard.messages.success'));
             setIsCreateOpen(false);
-            setSingleData({ certificateId: '', studentName: '', domain: '', startDate: '', endDate: '' });
+            setSingleData({ certId: '', name: '', course: '', date: '' });
             fetchData();
         } catch (err) {
             showMessage('error', err.response?.data?.message || t('dashboard.messages.loadFail'));
@@ -485,7 +486,7 @@ const Dashboard = () => {
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex justify-end gap-2">
                                                                                                                                  <Button variant="outline" size="sm" onClick={() => {
-                                                                    import('../utils/generatePDF').then(({ generateCertificatePDF }) => generateCertificatePDF(cert));
+                                                                    downloadCertificatePDF(cert.certId);
                                                                 }}>
                                                                     <span className="sr-only sm:not-sr-only sm:mr-2">PDF</span>
                                                                     <Download className="h-4 w-4 shrink-0" />
@@ -537,23 +538,19 @@ const Dashboard = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div className="sm:col-span-2">
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">{t('dashboard.modal.certId')}</label>
-                                        <Input required placeholder="CERT-2026-001" value={singleData.certificateId} onChange={(e) => setSingleData({ ...singleData, certificateId: e.target.value })} />
+                                        <Input required placeholder="CERT-2026-001" value={singleData.certId} onChange={(e) => setSingleData({ ...singleData, certId: e.target.value })} />
                                     </div>
                                     <div className="sm:col-span-2">
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">{t('dashboard.modal.student')}</label>
-                                        <Input required placeholder={t('login.namePlaceholder')} value={singleData.studentName} onChange={(e) => setSingleData({ ...singleData, studentName: e.target.value })} />
+                                        <Input required placeholder={t('login.namePlaceholder')} value={singleData.name} onChange={(e) => setSingleData({ ...singleData, name: e.target.value })} />
                                     </div>
                                     <div className="sm:col-span-2">
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">{t('dashboard.modal.domain')}</label>
-                                        <Input required placeholder="Machine Learning Fundamentals" value={singleData.domain} onChange={(e) => setSingleData({ ...singleData, domain: e.target.value })} />
+                                        <Input required placeholder="Machine Learning Fundamentals" value={singleData.course} onChange={(e) => setSingleData({ ...singleData, course: e.target.value })} />
                                     </div>
-                                    <div>
+                                    <div className="sm:col-span-2">
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">{t('dashboard.modal.start')}</label>
-                                        <Input type="date" required value={singleData.startDate} onChange={(e) => setSingleData({ ...singleData, startDate: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">{t('dashboard.modal.end')}</label>
-                                        <Input type="date" required value={singleData.endDate} onChange={(e) => setSingleData({ ...singleData, endDate: e.target.value })} />
+                                        <Input type="date" required value={singleData.date} onChange={(e) => setSingleData({ ...singleData, date: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="flex justify-end gap-3 pt-6 border-t border-[var(--theme-border)]">

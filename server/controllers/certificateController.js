@@ -47,15 +47,29 @@ const uploadCertificates = async (req, res) => {
 
 const createCertificate = async (req, res) => {
     try {
-        const { name, certId, course, date } = req.body;
-        if (!name || !certId || !course) return res.status(400).json({ message: "Missing fields" });
+        const { name, studentName, certId, certificateId, course, domain, date, startDate, endDate } = req.body;
+        
+        // Handle flexible field names
+        const finalName = name || studentName;
+        const finalCertId = certId || certificateId;
+        const finalCourse = course || domain;
+        const finalDate = date || startDate || endDate;
 
-        const existing = await Certificate.findOne({ certId: certId.trim() });
+        if (!finalName || !finalCertId || !finalCourse) {
+            return res.status(400).json({ message: "Missing fields: name, certId, and course are required." });
+        }
+
+        const existing = await Certificate.findOne({ certId: finalCertId.trim() });
         if (existing) {
             return res.status(400).json({ message: "Certificate ID already exists" });
         }
 
-        const newCert = await Certificate.create({ name, certId: certId.trim(), course, date });
+        const newCert = await Certificate.create({ 
+            name: finalName, 
+            certId: finalCertId.trim(), 
+            course: finalCourse, 
+            date: finalDate 
+        });
         res.status(201).json(newCert);
     } catch (err) {
         if (err.code === 11000) {

@@ -15,6 +15,7 @@ import {
   Award
 } from 'lucide-react';
 import API from '../services/api';
+import { downloadCertificatePDF } from '../utils/downloadUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -80,11 +81,10 @@ const AdminDashboardPage = () => {
     setMessage('');
     try {
       const payload = {
-        certificateId: form.certificateId,
-        studentName: form.studentName,
-        domain: form.course,
-        startDate: form.date,
-        endDate: form.date
+        certId: form.certificateId,
+        name: form.studentName,
+        course: form.course,
+        date: form.date
       };
       const { data } = await API.post('/certificates', payload);
       setMessage(`Certificate generated: ${data.certificateId || data.certId}`);
@@ -326,7 +326,7 @@ const AdminDashboardPage = () => {
                                   <Button 
                                     variant="outline" 
                                     size="sm" 
-                                    onClick={() => window.open(`/api/certificates/download/${cert.certId}`, '_blank')}
+                                    onClick={() => downloadCertificatePDF(cert.certId)}
                                     className="h-8 group-hover:bg-[var(--theme-accent-primary)] group-hover:text-white"
                                   >
                                     <span className="sr-only sm:not-sr-only sm:mr-2">PDF</span>
