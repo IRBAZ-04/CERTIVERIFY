@@ -1,5 +1,5 @@
 async function testLogin() {
-    const url = 'http://localhost:5000/api';
+    const url = 'https://certiverify-backend.onrender.com/api/register';
     
     // Register
     let res = await fetch(`${url}/auth/register`, {
