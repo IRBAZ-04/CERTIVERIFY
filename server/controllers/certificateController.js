@@ -1,6 +1,8 @@
 const Certificate = require('../models/Certificate');
 const xlsx = require('xlsx');
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
 // Helper function to generate unique certificate ID
 // batchOffset accounts for IDs generated earlier in the same upload batch
@@ -191,43 +193,54 @@ const verifyCertificate = async (req, res) => {
 };
 
 const downloadCertificate = async (req, res) => {
+    let browser = null;
     try {
         const cert = await Certificate.findOne({ certId: req.params.id });
         if (!cert) return res.status(404).json({ message: "Not found" });
 
-        // 1. Set response headers FIRST
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(cert.certId)}.pdf"`);
+        // 1. Load HTML template
+        const templatePath = path.join(__dirname, '..', 'templates', 'certificate.html');
+        let html = fs.readFileSync(templatePath, 'utf8');
 
-        // 2. Create PDF document
-        const doc = new PDFDocument({ size: 'A4', layout: 'landscape' });
+        // 2. Replace placeholders with actual certificate data
+        html = html.replace(/\{\{name\}\}/g, cert.name);
+        html = html.replace(/\{\{domain\}\}/g, cert.course);
+        html = html.replace(/\{\{certificateId\}\}/g, cert.certId);
+        html = html.replace(/\{\{date\}\}/g, cert.date || '');
 
-        // 3. Pipe document to response
-        doc.pipe(res);
+        // 3. Launch Puppeteer and render HTML to PDF
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
 
-        // 4. Add content (text, layout, certificate details)
-        doc.fontSize(44).text('Certificate of Completion', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(22).text('This is to certify that', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.fontSize(32).fillColor('#0284c7').text(cert.name, { align: 'center' });
-        doc.fillColor('black');
-        doc.moveDown(0.5);
-        doc.fontSize(20).text('has successfully completed the course', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.fontSize(26).text(cert.course, { align: 'center' });
-        doc.moveDown(2);
-        doc.fontSize(16).text(`Date: ${cert.date}`, { align: 'center' });
-        doc.fontSize(12).text(`Certificate ID: ${cert.certId}`, { align: 'center' });
+        // Set content and wait for Google Fonts to load
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        // 5. Finalize document: MUST call .end() to finalize stream and response
-        doc.end();
+        // Generate PDF — A4 portrait, matching the template design
+        const pdfBuffer = await page.pdf({
+            width: '794px',
+            height: '1123px',
+            printBackground: true,
+            margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        });
+
+        await browser.close();
+        browser = null;
+
+        // 4. Set headers and send the PDF buffer
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(cert.certId)}.pdf"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.end(pdfBuffer);
 
     } catch (err) {
+        if (browser) { try { await browser.close(); } catch {} }
         if (!res.headersSent) {
             res.status(500).json({ message: err.message });
         } else {
-            console.error('Error during PDF streaming:', err);
+            console.error('Error during PDF generation:', err);
             res.end();
         }
     }
