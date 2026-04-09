@@ -3,6 +3,7 @@ async function verifyDownload() {
     const url = 'https://certiverify-backend.onrender.com/api';    
 
     
+    
     // 1. Register a new admin to get a token
     let res = await fetch(`${url}/auth/register`, {
         method: 'POST',

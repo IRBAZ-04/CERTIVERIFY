@@ -18,6 +18,9 @@ const registerUser = async (req, res) => {
         
         res.json({ token, role: user.role, name: user.name });
     } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ message: 'Email already registered. Please login instead.' });
+        }
         res.status(400).json({ message: err.message });
     }
 };
