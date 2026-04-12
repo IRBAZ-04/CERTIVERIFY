@@ -12,7 +12,12 @@ import {
   FileText, 
   Download,
   Sparkles,
-  Award
+  Award,
+  Settings,
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldAlert
 } from 'lucide-react';
 import API from '../services/api';
 import { downloadCertificatePDF } from '../utils/downloadUtils';
@@ -34,7 +39,15 @@ const AdminDashboardPage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCertificates, setTotalCertificates] = useState(0);
-  const [activeTab, setActiveTab] = useState('list'); // 'list' or 'create'
+  const [activeTab, setActiveTab] = useState('list');
+
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   const limit = 10;
 
   const fetchCertificates = useCallback(async () => {
@@ -97,6 +110,37 @@ const AdminDashboardPage = () => {
     }
   };
 
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const { data } = await API.put('/auth/password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      setPasswordSuccess(data.message || 'Password changed successfully');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      localStorage.setItem('userInfo', JSON.stringify(data));
+    } catch (err) {
+      setPasswordError(err.response?.data?.message || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-8rem)] py-12 px-4 bg-[var(--theme-background)]">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
@@ -148,6 +192,24 @@ const AdminDashboardPage = () => {
               <FileText className={`h-4 w-4 ${activeTab === 'list' ? 'text-white' : 'text-[var(--theme-accent-primary)]'}`} />
             </div>
             <span className={`font-bold text-base ${activeTab === 'list' ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}>View Registry</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('settings')}
+            className={`group relative flex items-center gap-4 px-8 py-3 rounded-2xl border-2 transition-all duration-300 w-full sm:w-auto min-w-[220px] ${
+              activeTab === 'settings'
+                ? 'bg-[var(--theme-accent-primary)] border-[var(--theme-accent-primary)] text-white shadow-lg'
+                : 'bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent-primary)]/50'
+            }`}
+          >
+            <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-300 ${
+              activeTab === 'settings' ? 'bg-white/20' : 'bg-[var(--theme-accent-soft-bg)]'
+            }`}>
+              <Settings className={`h-4 w-4 ${activeTab === 'settings' ? 'text-white' : 'text-[var(--theme-accent-primary)]'}`} />
+            </div>
+            <span className={`font-bold text-base ${activeTab === 'settings' ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}>Settings</span>
           </motion.button>
         </div>
 
@@ -252,6 +314,130 @@ const AdminDashboardPage = () => {
                         <span className="font-bold text-[var(--theme-success-text)]">{message}</span>
                       </motion.div>
                     )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ) : activeTab === 'settings' ? (
+              <motion.div
+                key="settings-view"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="max-w-2xl mx-auto shadow-xl border-[var(--theme-border)] bg-[var(--theme-surface)]">
+                  <CardHeader className="border-b border-[var(--theme-border)] pb-6 bg-[var(--theme-hover-surface)]/30">
+                    <CardTitle className="flex items-center gap-3 text-2xl font-bold">
+                      <ShieldCheck className="h-6 w-6 text-[var(--theme-accent-primary)]" />
+                      Account Settings
+                    </CardTitle>
+                    <p className="text-sm text-[var(--theme-text-secondary)] mt-1">Manage your account security</p>
+                  </CardHeader>
+                  <CardContent className="pt-8 px-8">
+                    <form onSubmit={handlePasswordChange} className="space-y-6">
+                      <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--theme-accent-soft-bg)] border border-[var(--theme-accent-primary)]/20 mb-6">
+                        <ShieldAlert className="h-5 w-5 text-[var(--theme-accent-primary)] shrink-0" />
+                        <p className="text-sm text-[var(--theme-text-secondary)]">
+                          Change your password regularly to keep your account secure
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">
+                          Current Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            required
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            icon={Lock}
+                            placeholder="Enter current password"
+                            value={passwordForm.currentPassword}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]"
+                          >
+                            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            required
+                            type={showNewPassword ? 'text' : 'password'}
+                            icon={Lock}
+                            placeholder="Enter new password"
+                            value={passwordForm.newPassword}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]"
+                          >
+                            {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">
+                          Confirm New Password
+                        </label>
+                        <Input
+                          required
+                          type="password"
+                          icon={Lock}
+                          placeholder="Confirm new password"
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                        />
+                      </div>
+
+                      {passwordError && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-4 rounded-xl bg-[var(--theme-error-bg)] border border-[var(--theme-error-border)] text-[var(--theme-error-text)] text-sm flex items-center gap-3"
+                        >
+                          <ShieldAlert className="h-4 w-4 shrink-0" />
+                          {passwordError}
+                        </motion.div>
+                      )}
+
+                      {passwordSuccess && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-4 rounded-xl bg-[var(--theme-success-bg)] border border-[var(--theme-success-border)] text-[var(--theme-success-text)] text-sm flex items-center gap-3"
+                        >
+                          <CheckCircle2 className="h-4 w-4 shrink-0" />
+                          {passwordSuccess}
+                        </motion.div>
+                      )}
+
+                      <div className="pt-4">
+                        <Button
+                          type="submit"
+                          className="w-full sm:w-auto px-8"
+                          size="lg"
+                          loading={changingPassword}
+                        >
+                          <Lock className="h-4 w-4 mr-2" />
+                          Change Password
+                        </Button>
+                      </div>
+                    </form>
                   </CardContent>
                 </Card>
               </motion.div>

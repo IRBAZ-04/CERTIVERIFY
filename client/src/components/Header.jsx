@@ -23,10 +23,11 @@ const Header = () => {
         try {
             await API.post('/auth/logout');
         } catch {
-            // Ignore and clear local state anyway.
+            // Ignore errors and clear local state
         } finally {
             localStorage.removeItem('userInfo');
-            navigate('/login');
+            localStorage.removeItem('sessionStart');
+            window.location.href = '/login';
         }
     };
 

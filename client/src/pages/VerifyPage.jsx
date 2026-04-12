@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, CheckCircle2, XCircle, User, Award, Loader2, Shield, Download, ShieldCheck } from 'lucide-react';
-import API from '../services/api';
+import { useSearchParams } from 'react-router-dom';
+import { Search, CheckCircle2, XCircle, User, Award, Loader2, ShieldCheck } from 'lucide-react';
 import { downloadCertificatePDF } from '../utils/downloadUtils';
 import { Card, CardContent } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -13,8 +12,6 @@ const VerifyPage = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const certIdQuery = searchParams.get('id');
-    const navigate = useNavigate();
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
 
     const [certId, setCertId] = useState(certIdQuery || '');
     const [result, setResult] = useState(null);
@@ -22,30 +19,8 @@ const VerifyPage = () => {
     const [searched, setSearched] = useState(false);
 
     useEffect(() => {
-        if (certIdQuery && userInfo?.token) handleSearch(null, certIdQuery);
-    }, [certIdQuery, userInfo?.token]);
-
-    if (!userInfo?.token) {
-        return (
-            <div className="min-h-[calc(100vh-8rem)] py-12 px-4 flex items-center justify-center bg-[var(--theme-background)]">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    <Card className="p-10 text-center max-w-md w-full">
-                        <div className="h-16 w-16 rounded-2xl bg-[var(--theme-accent-primary)] mx-auto mb-5 flex items-center justify-center shadow-sm">
-                            <Shield className="h-8 w-8 text-white" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] mb-2">Access Restricted</h2>
-                        <p className="text-[var(--theme-text-secondary)] mb-8">Please login to verify certificates</p>
-                        <Button size="lg" className="w-full" onClick={() => navigate('/login')}>
-                            Login to Continue
-                        </Button>
-                    </Card>
-                </motion.div>
-            </div>
-        );
-    }
+        if (certIdQuery) handleSearch(null, certIdQuery);
+    }, [certIdQuery]);
 
     const handleSearch = async (e, idToSearch = certId) => {
         if (e) e.preventDefault();
@@ -57,16 +32,41 @@ const VerifyPage = () => {
         setSearchParams({ id: idToSearch });
 
         try {
-            const { data } = await API.get(`/certificates/verify/${idToSearch}`);
-            if (data.valid) {
-                setResult({ valid: true, cert: data.cert });
+            const baseUrl = import.meta.env.VITE_API_URL || 'https://certiverify-backend.onrender.com/api';
+            const response = await fetch(`${baseUrl}/certificates/download/${idToSearch}`);
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Certificate not found');
+                }
+                
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Certificate-${idToSearch}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                setResult({ valid: true, cert: { certId: idToSearch }, downloaded: true });
             } else {
-                setResult({ valid: false, message: t('verify.errors.notFound') });
+                const errorText = await response.text();
+                let errorMessage = 'Certificate not found';
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch {}
+                setResult({ valid: false, message: errorMessage });
             }
         } catch (err) {
             setResult({
                 valid: false,
-                message: err.response?.data?.message || t('verify.errors.notFound')
+                message: err.message || t('verify.errors.notFound')
             });
         } finally {
             setLoading(false);
@@ -150,36 +150,27 @@ const VerifyPage = () => {
                                             <CheckCircle2 className="h-6 w-6 text-white" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="font-semibold text-[var(--theme-success-text)] text-lg">{t('verify.results.valid')}</p>
-                                            <p className="text-sm text-[var(--theme-text-secondary)]">{t('verify.results.validDesc')}</p>
+                                            <p className="font-semibold text-[var(--theme-success-text)] text-lg">
+                                                {result.downloaded ? 'Certificate Ready!' : t('verify.results.valid')}
+                                            </p>
+                                            <p className="text-sm text-[var(--theme-text-secondary)]">
+                                                {result.downloaded ? 'Your download should start automatically' : t('verify.results.validDesc')}
+                                            </p>
                                         </div>
-                                        <Button variant="gold" size="sm" onClick={() => downloadCertificatePDF(result.cert.certId)} className="shrink-0">
-                                            Download
-                                            <Download className="h-4 w-4 ml-2" />
-                                        </Button>
+                                        {result.downloaded ? (
+                                            <div className="flex items-center gap-2 text-[var(--theme-success-text)]">
+                                                <CheckCircle2 className="h-5 w-5" />
+                                                <span className="text-sm font-medium">Downloaded!</span>
+                                            </div>
+                                        ) : (
+                                            <Button variant="gold" size="sm" onClick={() => downloadCertificatePDF(result.cert.certId)} className="shrink-0">
+                                                Download
+                                                <Download className="h-4 w-4 ml-2" />
+                                            </Button>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                            <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
-                                                <User className="h-5 w-5 text-[var(--theme-accent-primary)]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Certificate Holder</p>
-                                                <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.name}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                            <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
-                                                <Award className="h-5 w-5 text-[var(--theme-accent-primary)]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Domain</p>
-                                                <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.course}</p>
-                                            </div>
-                                        </div>
-
                                         <div className="p-4 rounded-xl bg-[var(--theme-hover-surface)]">
                                             <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">{t('verify.results.id')}</p>
                                             <p className="font-mono text-sm text-[var(--theme-text-primary)]">{result.cert.certId}</p>
@@ -190,15 +181,29 @@ const VerifyPage = () => {
                                             <p className="text-sm font-bold text-[var(--theme-success-text)]">VALID</p>
                                         </div>
 
-                                        <div className="p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                            <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Course</p>
-                                            <p className="text-sm text-[var(--theme-text-primary)]">{result.cert.course}</p>
-                                        </div>
+                                        {result.cert.name && (
+                                            <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
+                                                <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
+                                                    <User className="h-5 w-5 text-[var(--theme-accent-primary)]" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Certificate Holder</p>
+                                                    <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.name}</p>
+                                                </div>
+                                            </div>
+                                        )}
 
-                                        <div className="p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                            <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Date</p>
-                                            <p className="text-sm text-[var(--theme-text-primary)]">{result.cert.date}</p>
-                                        </div>
+                                        {result.cert.course && (
+                                            <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
+                                                <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
+                                                    <Award className="h-5 w-5 text-[var(--theme-accent-primary)]" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Domain</p>
+                                                    <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.course}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

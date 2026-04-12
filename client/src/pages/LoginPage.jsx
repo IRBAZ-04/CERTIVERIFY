@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail, ShieldAlert, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, ShieldAlert, ShieldCheck, Eye, EyeOff, User, Crown } from 'lucide-react';
 import API from '../services/api';
 import { Card, CardContent } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 
 const LoginPage = () => {
     const { t } = useTranslation();
+    const [loginType, setLoginType] = useState('user');
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,11 +27,27 @@ const LoginPage = () => {
                 email: formData.email,
                 password: formData.password
             });
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            if (data.role === 'user') {
-                navigate('/user-dashboard');
-            } else {
+            
+            if (loginType === 'admin' && data.role !== 'admin') {
+                setError('Access denied. This account does not have admin privileges.');
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('sessionStart');
+                setLoading(false);
+                return;
+            }
+            
+            if (loginType === 'user' && data.role === 'admin') {
                 navigate('/admin-dashboard');
+                return;
+            }
+            
+            localStorage.setItem('userInfo', JSON.stringify(data));
+            localStorage.setItem('sessionStart', Date.now().toString());
+            
+            if (data.role === 'admin') {
+                navigate('/admin-dashboard');
+            } else {
+                navigate('/user-dashboard');
             }
         } catch (err) {
             setError(err.response?.data?.message || t('login.authFail'));
@@ -39,17 +56,9 @@ const LoginPage = () => {
         }
     };
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
-    };
-
-    const staggerContainer = {
-        animate: {
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
+    const handleInputChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        setError('');
     };
 
     return (
@@ -86,7 +95,7 @@ const LoginPage = () => {
                             transition={{ delay: 0.4 }}
                             className="text-lg text-[var(--theme-text-secondary)] leading-relaxed"
                         >
-                            Sign in to access your certificate verification dashboard and manage your organization's credentials.
+                            Sign in to access your certificate verification dashboard and manage your organization&apos;s credentials.
                         </motion.p>
                         <motion.div 
                             initial={{ opacity: 0, y: 10 }}
@@ -117,7 +126,8 @@ const LoginPage = () => {
                     >
                         <Card className="w-full">
                             <CardContent className="p-8">
-                                <div className="lg:hidden text-center mb-8">
+                                {/* Mobile Logo */}
+                                <div className="lg:hidden text-center mb-6">
                                     <div className="h-12 w-12 rounded-xl bg-[var(--theme-accent-primary)] mx-auto mb-4 flex items-center justify-center shadow-sm">
                                         <ShieldCheck className="h-6 w-6 text-white" />
                                     </div>
@@ -129,12 +139,44 @@ const LoginPage = () => {
                                     </p>
                                 </div>
 
-                                <div className="hidden lg:block mb-8">
+                                {/* Login Type Tabs */}
+                                <div className="flex gap-2 p-1.5 bg-[var(--theme-hover-surface)] rounded-xl mb-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setLoginType('user'); setFormData({ email: '', password: '' }); setError(''); }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                            loginType === 'user'
+                                                ? 'bg-[var(--theme-accent-primary)] text-white shadow-md'
+                                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                        }`}
+                                    >
+                                        <User className="h-4 w-4" />
+                                        User Login
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setLoginType('admin'); setFormData({ email: '', password: '' }); setError(''); }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                            loginType === 'admin'
+                                                ? 'bg-[var(--theme-accent-gold)] text-white shadow-md'
+                                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                        }`}
+                                    >
+                                        <Crown className="h-4 w-4" />
+                                        Admin Login
+                                    </button>
+                                </div>
+
+                                {/* Form Header */}
+                                <div className="mb-6">
                                     <h2 className="text-2xl font-bold text-[var(--theme-text-primary)]">
-                                        Sign In
+                                        {loginType === 'admin' ? 'Admin Portal' : 'Sign In'}
                                     </h2>
                                     <p className="text-sm text-[var(--theme-text-secondary)] mt-1">
-                                        Enter your credentials to continue
+                                        {loginType === 'admin' 
+                                            ? 'Access the administrative dashboard'
+                                            : 'Enter your credentials to continue'
+                                        }
                                     </p>
                                 </div>
 
@@ -149,14 +191,8 @@ const LoginPage = () => {
                                     </motion.div>
                                 )}
 
-                                <motion.form 
-                                    onSubmit={handleSubmit} 
-                                    className="space-y-5"
-                                    variants={staggerContainer}
-                                    initial="initial"
-                                    animate="animate"
-                                >
-                                    <motion.div variants={fadeInUp}>
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">
                                             {t('login.email')}
                                         </label>
@@ -166,11 +202,11 @@ const LoginPage = () => {
                                             icon={Mail}
                                             placeholder={t('login.emailPlaceholder')}
                                             value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            onChange={(e) => handleInputChange('email', e.target.value)}
                                         />
-                                    </motion.div>
+                                    </div>
 
-                                    <motion.div variants={fadeInUp}>
+                                    <div>
                                         <label className="block text-sm font-medium text-[var(--theme-text-primary)] mb-2">
                                             {t('login.password')}
                                         </label>
@@ -182,21 +218,19 @@ const LoginPage = () => {
                                             rightIconAction={() => setShowPassword(!showPassword)}
                                             placeholder={t('login.passPlaceholder')}
                                             value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            onChange={(e) => handleInputChange('password', e.target.value)}
                                         />
-                                    </motion.div>
+                                    </div>
 
-                                    <motion.div variants={fadeInUp}>
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                            size="lg"
-                                            loading={loading}
-                                        >
-                                            Sign In
-                                        </Button>
-                                    </motion.div>
-                                </motion.form>
+                                    <Button
+                                        type="submit"
+                                        className={`w-full ${loginType === 'admin' ? 'bg-[var(--theme-accent-gold)] hover:bg-[var(--theme-accent-gold)]/90' : ''}`}
+                                        size="lg"
+                                        loading={loading}
+                                    >
+                                        {loginType === 'admin' ? 'Access Admin Panel' : 'Sign In'}
+                                    </Button>
+                                </form>
 
                                 <motion.div 
                                     initial={{ opacity: 0 }}
@@ -205,7 +239,7 @@ const LoginPage = () => {
                                     className="mt-6 text-center"
                                 >
                                     <p className="text-sm text-[var(--theme-text-secondary)]">
-                                        Don't have an account?{' '}
+                                        Don&apos;t have an account?{' '}
                                         <Link to="/register" className="text-[var(--theme-accent-primary)] font-medium hover:underline">
                                             Create one
                                         </Link>

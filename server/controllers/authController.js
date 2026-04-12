@@ -7,9 +7,8 @@ const registerUser = async (req, res) => {
         let { name, email, password, adminPasscode } = req.body;
         email = email.toLowerCase();
         
-        // Ensure first user is admin, or explicitly requested via passcode
-        const usersCount = await User.countDocuments({});
-        const role = (usersCount === 0 || adminPasscode === 'admin123') ? 'admin' : 'user';
+        // Assign role: only admin if correct passcode provided
+        const role = (adminPasscode === 'AmdoxAdmin9870') ? 'admin' : 'user';
 
         const hashed = await bcrypt.hash(password, 10);
         const user = await User.create({ name, email, password: hashed, role });
@@ -62,4 +61,34 @@ const getUsers = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, getUsers };
+const updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const valid = await bcrypt.compare(currentPassword, user.password);
+        if (!valid) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        const hashed = await bcrypt.hash(newPassword, 10);
+        user.password = hashed;
+        await user.save();
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, name: user.name }, 
+            process.env.JWT_SECRET || 'SECRET', 
+            { expiresIn: '30d' }
+        );
+        
+        res.json({ message: 'Password updated successfully', token, role: user.role, name: user.name });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, getUsers, updatePassword };

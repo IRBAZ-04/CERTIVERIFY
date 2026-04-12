@@ -9,22 +9,22 @@ const path = require('path');
 const generateUniqueCertificateId = async (batchOffset = 0) => {
     const year = new Date().getFullYear();
     const prefix = `CERT-${year}-`;
-    
+
     // Find the highest number for this year
     const lastCert = await Certificate.findOne(
         { certId: { $regex: `^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}` } },
         { certId: 1 },
         { sort: { certId: -1 } }
     );
-    
+
     let nextNumber = 1;
     if (lastCert) {
         const lastNumber = parseInt(lastCert.certId.split('-')[2]);
         nextNumber = lastNumber + 1;
     }
-    
+
     nextNumber += batchOffset;
-    
+
     return `${prefix}${String(nextNumber).padStart(4, '0')}`;
 };
 
@@ -118,7 +118,7 @@ const uploadCertificates = async (req, res) => {
 const createCertificate = async (req, res) => {
     try {
         const { name, studentName, certId, certificateId, course, domain, date, startDate, endDate } = req.body;
-        
+
         // Handle flexible field names
         const finalName = name || studentName;
         const finalCertId = certId || certificateId;
@@ -134,11 +134,11 @@ const createCertificate = async (req, res) => {
             return res.status(400).json({ message: "Certificate ID already exists" });
         }
 
-        const newCert = await Certificate.create({ 
-            name: finalName, 
-            certId: finalCertId.trim(), 
-            course: finalCourse, 
-            date: finalDate 
+        const newCert = await Certificate.create({
+            name: finalName,
+            certId: finalCertId.trim(),
+            course: finalCourse,
+            date: finalDate
         });
         res.status(201).json(newCert);
     } catch (err) {
@@ -229,14 +229,18 @@ const downloadCertificate = async (req, res) => {
         await browser.close();
         browser = null;
 
-        // 4. Set headers and send the PDF buffer
+        // 4. Set headers for cross-device download compatibility
+        const filename = encodeURIComponent(cert.certId) + '.pdf';
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(cert.certId)}.pdf"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${filename}`);
         res.setHeader('Content-Length', pdfBuffer.length);
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.end(pdfBuffer);
 
     } catch (err) {
-        if (browser) { try { await browser.close(); } catch {} }
+        if (browser) { try { await browser.close(); } catch { } }
         if (!res.headersSent) {
             res.status(500).json({ message: err.message });
         } else {

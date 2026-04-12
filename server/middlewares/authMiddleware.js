@@ -5,8 +5,10 @@ const protect = (req, res, next) => {
     let token = req.headers.authorization;
     if (token && token.startsWith('Bearer')) {
         token = token.split(' ')[1];
+    } else if (req.query && req.query.token) {
+        token = req.query.token;
     }
-    
+
     if (!token) return res.status(401).json({ msg: "No token" });
 
     try {
