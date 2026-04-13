@@ -21,12 +21,6 @@ const AdminDashboardPage = () => {
     const [totalCertificates, setTotalCertificates] = useState(0);
     const limit = 10;
     
-    // Settings Mode State
-    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    const [passwordError, setPasswordError] = useState('');
-    const [passwordSuccess, setPasswordSuccess] = useState('');
-    const [changingPassword, setChangingPassword] = useState(false);
-    
     // Tab active state
     const [activeTab, setActiveTab] = useState('list'); // 'list' | 'create' | 'settings'
 
@@ -87,31 +81,6 @@ const AdminDashboardPage = () => {
             setMessage(err.response?.data?.message || 'Generation failed.');
         } finally {
             setCreating(false);
-        }
-    };
-    
-    const handlePasswordChange = async (e) => {
-        e.preventDefault();
-        setPasswordError('');
-        setPasswordSuccess('');
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setPasswordError('New passwords do not match');
-            return;
-        }
-        if (passwordForm.newPassword.length < 8) {
-            setPasswordError('Password must be at least 8 characters');
-            return;
-        }
-        setChangingPassword(true);
-        try {
-            const { data } = await API.put('/auth/password', { currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword });
-            setPasswordSuccess(data.message || 'Password changed successfully');
-            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            localStorage.setItem('userInfo', JSON.stringify(data));
-        } catch (err) {
-            setPasswordError(err.response?.data?.message || 'Failed to change password');
-        } finally {
-            setChangingPassword(false);
         }
     };
 
@@ -404,65 +373,43 @@ const AdminDashboardPage = () => {
                     <div className="max-w-2xl mx-auto bg-surface-container-low border-[0.5px] border-outline-variant/30 p-12 lg:p-20 mt-12">
                         <div className="mb-12 border-b-[0.5px] border-outline-variant/30 pb-6">
                             <h2 className="font-headline text-4xl mb-2">Account Settings</h2>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface/50">Manage Administrator Password</p>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface/50">Manage Your Account</p>
                         </div>
                         
-                        <form onSubmit={handlePasswordChange} className="space-y-10">
-                            <div className="group">
-                                <label className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface">Current Password</label>
-                                <input 
-                                    required
-                                    type="password"
-                                    className="w-full bg-transparent border-0 border-b-[0.5px] border-outline-variant py-3 focus:ring-0 focus:border-primary-container font-body text-sm text-on-surface transition-colors"
-                                    value={passwordForm.currentPassword}
-                                    onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                                />
-                            </div>
-                            <div className="group flex gap-8">
-                                <div className="flex-1">
-                                    <label className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface">New Password</label>
-                                    <input 
-                                        required
-                                        type="password"
-                                        className="w-full bg-transparent border-0 border-b-[0.5px] border-outline-variant py-3 focus:ring-0 focus:border-primary-container font-body text-sm text-on-surface transition-colors"
-                                        value={passwordForm.newPassword}
-                                        onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <label className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface">Confirm New Password</label>
-                                    <input 
-                                        required
-                                        type="password"
-                                        className="w-full bg-transparent border-0 border-b-[0.5px] border-outline-variant py-3 focus:ring-0 focus:border-primary-container font-body text-sm text-on-surface transition-colors"
-                                        value={passwordForm.confirmPassword}
-                                        onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            
-                            {passwordError && (
-                                <div className="p-4 bg-error/10 border-l-2 border-error text-[11px] font-bold uppercase tracking-widest text-error">
-                                    {passwordError}
+                        <div className="space-y-8">
+                            {userInfo && (
+                                <div className="space-y-6">
+                                    <div className="p-6 bg-primary/10 border-[0.5px] border-primary rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Administrator Name</p>
+                                                <p className="text-lg font-bold text-on-surface mt-2">{userInfo.name || 'Administrator'}</p>
+                                            </div>
+                                            <span className="material-symbols-outlined text-[32px] text-primary">admin_panel_settings</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
+                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Email Address</p>
+                                        <p className="text-base text-on-surface mt-2 break-all">{userInfo.email}</p>
+                                    </div>
+
+                                    <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
+                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Role</p>
+                                        <p className="text-base text-primary mt-2 font-bold uppercase">{userInfo.role}</p>
+                                    </div>
+
+                                    <div className="p-6 bg-primary/5 border-[0.5px] border-primary/30 rounded-lg">
+                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70 mb-3">Security</p>
+                                        <p className="text-sm text-on-surface/80 mb-4">To change your password, click on your profile icon in the top-right corner and select "Change Password".</p>
+                                        <div className="flex items-center gap-2 text-sm text-primary font-bold">
+                                            <span className="material-symbols-outlined text-[20px]">verified_user</span>
+                                            Password change available in Profile Menu
+                                        </div>
+                                    </div>
                                 </div>
                             )}
-
-                            {passwordSuccess && (
-                                <div className="p-4 bg-primary-container/10 border-l-2 border-primary-container text-[11px] font-bold uppercase tracking-widest text-primary-container">
-                                    {passwordSuccess}
-                                </div>
-                            )}
-
-                            <div className="pt-8">
-                                <button 
-                                    type="submit" 
-                                    disabled={changingPassword}
-                                    className="bg-on-surface text-surface px-12 py-4 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-primary transition-all disabled:opacity-50"
-                                >
-                                    {changingPassword ? 'Updating...' : 'Change Password'}
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 )}
             </main>
