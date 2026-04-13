@@ -51,7 +51,7 @@ const Button = React.forwardRef(({
     <motion.button
       ref={ref}
       whileHover={!disabled && !loading ? { scale: 1.02, y: -2 } : {}}
-      whileTap={!disabled && !loading ? { scale: 0.98, y: 0 } : {}}
+      whileTap={!disabled && !loading ? { scale: 0.95, y: 0 } : {}}
       className={cn(
         'flex items-center justify-center gap-2 font-medium transition-all duration-200 ease-out ' +
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--theme-background)] ' +

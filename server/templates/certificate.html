@@ -434,6 +434,36 @@
       margin-top: 2px;
     }
 
+    /* ── QR Section ──────────────────────────────────────── */
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-left: 32px;
+      padding-left: 32px;
+      border-left: 1px solid rgba(17, 24, 39, 0.1);
+    }
+    .qr-img {
+      width: 60px;
+      height: 60px;
+      background: white;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .qr-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 7px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      margin-top: 5px;
+      white-space: nowrap;
+    }
+
     /* ── Color strip ──────────────────────────────────────── */
     .cert-strip {
       height: 5px;
@@ -611,6 +641,11 @@
           <div class="sig-role">AMDOX TECHNOLOGY</div>
         </div>
 
+      </div>
+
+      <div class="qr-box">
+        <img src="{{qrCode}}" class="qr-img" alt="QR Verify" />
+        <div class="qr-label">Scan to Verify</div>
       </div>
 
     </div><!-- /cert-bottom -->

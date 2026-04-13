@@ -9,6 +9,7 @@ const Header = () => {
     const { isDark, toggle } = useTheme();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [passwordError, setPasswordError] = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
@@ -125,6 +126,16 @@ const Header = () => {
                                     </div>
                                     <button
                                         onClick={() => {
+                                            setShowSettingsModal(true);
+                                            setShowProfileMenu(false);
+                                        }}
+                                        className="w-full px-4 py-3 text-left text-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-3 border-b-[0.5px] border-outline-variant"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">settings</span>
+                                        Settings
+                                    </button>
+                                    <button
+                                        onClick={() => {
                                             setShowPasswordModal(true);
                                             setShowProfileMenu(false);
                                         }}
@@ -157,10 +168,76 @@ const Header = () => {
             </nav>
             <div className="bg-surface-container-high h-[0.5px] w-full"></div>
 
+            {/* Account Settings Modal */}
+            {showSettingsModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] px-4 backdrop-blur-sm">
+                    <div className="bg-surface border-[0.5px] border-outline-variant rounded-lg p-8 md:p-12 w-[90vw] sm:w-[500px] md:w-[600px] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                        <button 
+                            onClick={() => setShowSettingsModal(false)}
+                            className="absolute top-6 right-6 text-on-surface/50 hover:text-error transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-[24px]">close</span>
+                        </button>
+                        
+                        <div className="mb-8 border-b-[0.5px] border-outline-variant/30 pb-6">
+                            <h2 className="font-headline text-3xl mb-2 flex items-center gap-3 text-on-surface whitespace-nowrap">
+                                <span className="material-symbols-outlined text-primary text-[32px] shrink-0">manage_accounts</span>
+                                Account Settings
+                            </h2>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface/50">Stored Application Data</p>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            <div className="p-6 bg-primary/10 border-[0.5px] border-primary rounded-lg flex items-center justify-between">
+                                <div>
+                                    <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Name</p>
+                                    <p className="text-lg font-bold text-on-surface mt-2">{userInfo.name || 'User'}</p>
+                                </div>
+                                <span className="material-symbols-outlined text-[32px] text-primary">{isAdmin ? 'admin_panel_settings' : 'person'}</span>
+                            </div>
+
+                            <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
+                                <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Email Address</p>
+                                <p className="text-base text-on-surface font-semibold mt-2 break-all flex items-center gap-2">
+                                    {userInfo.email ? (
+                                        userInfo.email
+                                    ) : (
+                                        <span className="text-on-surface/50 text-sm italic">Not recorded in current session</span>
+                                    )}
+                                </p>
+                            </div>
+
+                            <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
+                                <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Role</p>
+                                <p className="text-base text-primary mt-2 font-bold uppercase">{userInfo.role || 'User'}</p>
+                            </div>
+
+                            <div className="p-6 bg-primary/5 border-[0.5px] border-primary/30 rounded-lg">
+                                <div className="flex items-center gap-2 text-sm text-primary font-bold">
+                                    <span className="material-symbols-outlined text-[20px]">verified_user</span>
+                                    Account verified & active
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Password Change Modal */}
             {showPasswordModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
-                    <div className="bg-surface border-[0.5px] border-outline-variant rounded-lg p-8 w-full max-w-md shadow-lg">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] px-4 backdrop-blur-sm">
+                    <div className="bg-surface border-[0.5px] border-outline-variant rounded-lg p-8 w-full max-w-md shadow-lg relative">
+                        <button 
+                            onClick={() => {
+                                setShowPasswordModal(false);
+                                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                                setPasswordError('');
+                                setPasswordSuccess('');
+                            }}
+                            className="absolute top-6 right-6 text-on-surface/50 hover:text-error transition-colors"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
                         <div className="flex items-center gap-3 mb-6">
                             <span className="material-symbols-outlined text-[28px] text-primary">lock</span>
                             <h2 className="text-xl font-bold text-on-surface">Change Password</h2>

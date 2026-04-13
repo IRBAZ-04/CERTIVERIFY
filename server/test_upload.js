@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 async function testUpload() {
-    const url = 'http://localhost:5000/api';
+    const url = 'https://certiverify-backend.onrender.com/api';
     
     // Connect and clear certs for clean test
     await mongoose.connect(process.env.MONGO_URI);

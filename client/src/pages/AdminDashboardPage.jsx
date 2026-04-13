@@ -22,7 +22,7 @@ const AdminDashboardPage = () => {
     const limit = 10;
     
     // Tab active state
-    const [activeTab, setActiveTab] = useState('list'); // 'list' | 'create' | 'settings'
+    const [activeTab, setActiveTab] = useState('list'); // 'list' | 'create' | 'profile'
 
     const fetchCertificates = useCallback(async () => {
         try {
@@ -99,12 +99,6 @@ const AdminDashboardPage = () => {
                     className={`font-label text-xs uppercase tracking-[0.05em] transition-colors ${activeTab === 'create' ? 'text-primary font-bold border-b border-primary pb-1' : 'text-on-surface/50 hover:text-on-surface'}`}
                 >
                     Issue New
-                </button>
-                <button 
-                    onClick={() => setActiveTab('settings')} 
-                    className={`font-label text-xs uppercase tracking-[0.05em] transition-colors ${activeTab === 'settings' ? 'text-primary font-bold border-b border-primary pb-1' : 'text-on-surface/50 hover:text-on-surface'}`}
-                >
-                    Settings
                 </button>
             </div>
 
@@ -368,50 +362,6 @@ const AdminDashboardPage = () => {
                     </div>
                 )}
 
-                {/* ---------------- SETTINGS TAB ---------------- */}
-                {activeTab === 'settings' && (
-                    <div className="max-w-2xl mx-auto bg-surface-container-low border-[0.5px] border-outline-variant/30 p-12 lg:p-20 mt-12">
-                        <div className="mb-12 border-b-[0.5px] border-outline-variant/30 pb-6">
-                            <h2 className="font-headline text-4xl mb-2">Account Settings</h2>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface/50">Manage Your Account</p>
-                        </div>
-                        
-                        <div className="space-y-8">
-                            {userInfo && (
-                                <div className="space-y-6">
-                                    <div className="p-6 bg-primary/10 border-[0.5px] border-primary rounded-lg">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Administrator Name</p>
-                                                <p className="text-lg font-bold text-on-surface mt-2">{userInfo.name || 'Administrator'}</p>
-                                            </div>
-                                            <span className="material-symbols-outlined text-[32px] text-primary">admin_panel_settings</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
-                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Email Address</p>
-                                        <p className="text-base text-on-surface mt-2 break-all">{userInfo.email}</p>
-                                    </div>
-
-                                    <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
-                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Role</p>
-                                        <p className="text-base text-primary mt-2 font-bold uppercase">{userInfo.role}</p>
-                                    </div>
-
-                                    <div className="p-6 bg-primary/5 border-[0.5px] border-primary/30 rounded-lg">
-                                        <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70 mb-3">Security</p>
-                                        <p className="text-sm text-on-surface/80 mb-4">To change your password, click on your profile icon in the top-right corner and select "Change Password".</p>
-                                        <div className="flex items-center gap-2 text-sm text-primary font-bold">
-                                            <span className="material-symbols-outlined text-[20px]">verified_user</span>
-                                            Password change available in Profile Menu
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
             </main>
         </div>
     );

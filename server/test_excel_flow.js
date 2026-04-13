@@ -6,7 +6,7 @@ const path = require('path');
 const http = require('http');
 
 dotenv.config();
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://certiverify-backend.onrender.com/api';
 const results = [];
 
 function log(msg) { results.push(msg); console.log(msg); }

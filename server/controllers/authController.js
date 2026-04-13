@@ -13,9 +13,9 @@ const registerUser = async (req, res) => {
         const hashed = await bcrypt.hash(password, 10);
         const user = await User.create({ name, email, password: hashed, role });
 
-        const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
+        const token = jwt.sign({ id: user._id, role: user.role, name: user.name, email: user.email }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
         
-        res.json({ token, role: user.role, name: user.name });
+        res.json({ token, role: user.role, name: user.name, email: user.email });
     } catch (err) {
         if (err.code === 11000) {
             return res.status(400).json({ message: 'Email already registered. Please login instead.' });
@@ -41,8 +41,8 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
-        res.json({ token, role: user.role, name: user.name });
+        const token = jwt.sign({ id: user._id, role: user.role, name: user.name, email: user.email }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
+        res.json({ token, role: user.role, name: user.name, email: user.email });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -80,12 +80,12 @@ const updatePassword = async (req, res) => {
         await user.save();
 
         const token = jwt.sign(
-            { id: user._id, role: user.role, name: user.name }, 
+            { id: user._id, role: user.role, name: user.name, email: user.email }, 
             process.env.JWT_SECRET || 'SECRET', 
             { expiresIn: '30d' }
         );
         
-        res.json({ message: 'Password updated successfully', token, role: user.role, name: user.name });
+        res.json({ message: 'Password updated successfully', token, role: user.role, name: user.name, email: user.email });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

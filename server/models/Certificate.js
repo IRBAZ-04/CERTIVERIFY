@@ -4,7 +4,8 @@ const certSchema = new mongoose.Schema({
   name: String,
   certId: { type: String, unique: true, required: true, trim: true },
   course: String,
-  date: String
+  date: String,
+  qrCode: String
 });
 
 module.exports = mongoose.model("Certificate", certSchema);
