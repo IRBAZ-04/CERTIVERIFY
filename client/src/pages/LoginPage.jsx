@@ -37,18 +37,14 @@ const LoginPage = () => {
             }
             
             if (loginType === 'user' && data.role === 'admin') {
-                navigate('/admin-dashboard');
+                navigate('/');
                 return;
             }
             
             localStorage.setItem('userInfo', JSON.stringify(data));
             localStorage.setItem('sessionStart', Date.now().toString());
             
-            if (data.role === 'admin') {
-                navigate('/admin-dashboard');
-            } else {
-                navigate('/user-dashboard');
-            }
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || t('login.authFail'));
         } finally {

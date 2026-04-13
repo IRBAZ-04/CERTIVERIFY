@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, CheckCircle2, XCircle, User, Award, Loader2, ShieldCheck } from 'lucide-react';
 import { downloadCertificatePDF } from '../utils/downloadUtils';
-import { Card, CardContent } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import API from '../services/api';
 
 const VerifyPage = () => {
-    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const certIdQuery = searchParams.get('id');
 
@@ -32,41 +26,12 @@ const VerifyPage = () => {
         setSearchParams({ id: idToSearch });
 
         try {
-            const baseUrl = import.meta.env.VITE_API_URL || 'https://certiverify-backend.onrender.com/api';
-            const response = await fetch(`${baseUrl}/certificates/download/${idToSearch}`);
-            
-            if (response.ok) {
-                const blob = await response.blob();
-                const contentType = response.headers.get('content-type');
-                
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Certificate not found');
-                }
-                
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Certificate-${idToSearch}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-                
-                setResult({ valid: true, cert: { certId: idToSearch }, downloaded: true });
-            } else {
-                const errorText = await response.text();
-                let errorMessage = 'Certificate not found';
-                try {
-                    const errorData = JSON.parse(errorText);
-                    errorMessage = errorData.message || errorMessage;
-                } catch {}
-                setResult({ valid: false, message: errorMessage });
-            }
+            await API.get(`/certificates/validate/${idToSearch}`);
+            setResult({ valid: true, cert: { certId: idToSearch }, downloaded: false });
         } catch (err) {
             setResult({
                 valid: false,
-                message: err.message || t('verify.errors.notFound')
+                message: err.message || 'Certificate record could not be found.'
             });
         } finally {
             setLoading(false);
@@ -74,158 +39,137 @@ const VerifyPage = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-8rem)] py-12 px-4 bg-[var(--theme-background)]">
-            <div className="max-w-3xl mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-10"
-                >
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-[var(--theme-accent-soft-bg)] text-[var(--theme-accent-primary)] mb-6 border border-[var(--theme-accent-primary)]/20">
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        {t('verify.badge')}
-                    </div>
-                    <h1 className="text-4xl font-bold text-[var(--theme-text-primary)] mb-4 tracking-tight">
-                        {t('verify.title')}
-                    </h1>
-                    <p className="text-[var(--theme-text-secondary)] max-w-xl mx-auto text-lg">
-                        {t('verify.subtitle')}
-                    </p>
-                </motion.div>
+        <main className="min-h-[calc(100vh-8rem)] py-16 px-6 md:px-12 bg-background flex flex-col items-center justify-center relative overflow-hidden">
+            
+            {/* Header Section */}
+            <div className="text-center max-w-4xl w-full mb-16 relative z-10">
+                <div className="inline-flex items-center justify-center gap-3 mb-8">
+                    <span className="material-symbols-outlined text-primary text-2xl">shield_check</span>
+                    <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-primary">Certificate Verification System</span>
+                </div>
+                <h1 className="font-headline text-5xl md:text-7xl text-on-surface leading-tight tracking-tight mb-8">
+                    Verify Authenticity
+                </h1>
+                <p className="text-on-surface-variant text-lg md:text-xl font-body leading-relaxed max-w-2xl mx-auto">
+                    Enter a certificate identifier below to validate its authenticity against our secure database.
+                </p>
+            </div>
 
-                <motion.form
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    onSubmit={handleSearch}
-                    className="w-full flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8"
-                >
-                    <div className="relative flex-1">
-                        <Input
-                            icon={Search}
-                            type="text"
-                            placeholder={t('verify.placeholder')}
-                            value={certId}
-                            onChange={(e) => setCertId(e.target.value)}
-                            className="w-full font-mono"
-                            autoComplete="off"
-                            aria-label={t('verify.results.id')}
-                        />
-                    </div>
-
-                    <Button
-                        type="submit"
-                        size="lg"
-                        className="shrink-0"
-                        loading={loading}
-                        disabled={loading || !certId.trim()}
-                    >
-                        {t('verify.button')}
-                    </Button>
-                </motion.form>
-
-                {loading && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col items-center py-16 gap-4"
-                    >
-                        <div className="h-14 w-14 rounded-2xl bg-[var(--theme-accent-soft-bg)] flex items-center justify-center">
-                            <Loader2 className="h-7 w-7 animate-spin text-[var(--theme-accent-primary)]" />
+            {/* Centered Search Box */}
+            <div className="w-full max-w-3xl mb-20 relative z-10">
+                <div className="bg-surface border-[0.5px] border-outline-variant/50 p-4 shadow-xl shadow-on-surface/5 relative overflow-hidden hover:border-primary/50 transition-colors duration-500 rounded-none">
+                    <form onSubmit={handleSearch} className="relative flex flex-col sm:flex-row gap-4 w-full">
+                        <div className="relative flex-1 flex items-center bg-transparent border-[0.5px] border-outline-variant/50 hover:border-primary/50 transition-colors">
+                            <span className="material-symbols-outlined absolute left-6 text-on-surface-variant/50">search</span>
+                            <input 
+                                type="text"
+                                placeholder="ENTER CERTIFICATE ID (e.g. CERT-2024-001)"
+                                className="w-full bg-transparent border-none py-6 pl-16 pr-6 text-sm md:text-base font-bold uppercase tracking-[0.1em] font-body focus:ring-0 placeholder:text-on-surface-variant/40 text-on-surface outline-none"
+                                value={certId}
+                                onChange={(e) => setCertId(e.target.value)}
+                            />
                         </div>
-                        <p className="text-sm text-[var(--theme-text-secondary)]">{t('verify.verifying')}</p>
-                    </motion.div>
+                        <button 
+                            type="submit" 
+                            disabled={loading || !certId.trim()}
+                            className="bg-primary text-white px-12 py-6 text-[12px] font-bold uppercase tracking-[0.1em] hover:bg-primary-container transition-colors disabled:opacity-50 shrink-0 flex items-center justify-center gap-3"
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="material-symbols-outlined animate-spin text-[16px]">refresh</span>
+                                    Scanning
+                                </>
+                            ) : (
+                                'Verify'
+                            )}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {/* Results Section */}
+            <div className="w-[100%] max-w-[800px] mt-4 z-10 relative">
+                {loading && (
+                    <div className="bg-surface-container-low border-[0.5px] border-outline-variant/30 p-12 text-center flex flex-col items-center justify-center animate-pulse w-full">
+                        <span className="material-symbols-outlined text-primary text-4xl mb-4 animate-spin">refresh</span>
+                        <h3 className="font-headline text-2xl text-on-surface mb-2">Querying Database...</h3>
+                        <p className="text-xs text-on-surface-variant font-body">Verifying cryptographic hash</p>
+                    </div>
                 )}
 
                 {searched && !loading && result && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
+                    <div className="w-full transition-opacity duration-500 opacity-100">
                         {result.valid ? (
-                            <Card>
-                                <CardContent className="pt-6">
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 p-5 rounded-xl bg-gradient-to-r from-[var(--theme-success-bg)] to-[var(--theme-accent-soft-bg)] border border-[var(--theme-success-border)]">
-                                        <div className="h-12 w-12 rounded-xl bg-[var(--theme-success-text)] flex items-center justify-center shrink-0">
-                                            <CheckCircle2 className="h-6 w-6 text-white" />
+                            <div className="bg-surface border-[0.5px] border-primary/20 shadow-2xl shadow-primary/5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+                                <div className="p-8 md:p-12">
+                                    <div className="flex flex-col md:flex-row items-center gap-6 mb-10 w-full">
+                                        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span className="material-symbols-outlined text-primary text-4xl">verified</span>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="font-semibold text-[var(--theme-success-text)] text-lg">
-                                                {result.downloaded ? 'Certificate Ready!' : t('verify.results.valid')}
-                                            </p>
-                                            <p className="text-sm text-[var(--theme-text-secondary)]">
-                                                {result.downloaded ? 'Your download should start automatically' : t('verify.results.validDesc')}
-                                            </p>
+                                        <div className="text-center md:text-left flex-grow">
+                                            <h2 className="font-headline text-3xl text-on-surface font-bold mb-2">Valid Certificate</h2>
+                                            <p className="text-sm text-primary font-bold font-body">✓ Record successfully authenticated</p>
                                         </div>
-                                        {result.downloaded ? (
-                                            <div className="flex items-center gap-2 text-[var(--theme-success-text)]">
-                                                <CheckCircle2 className="h-5 w-5" />
-                                                <span className="text-sm font-medium">Downloaded!</span>
-                                            </div>
-                                        ) : (
-                                            <Button variant="gold" size="sm" onClick={() => downloadCertificatePDF(result.cert.certId)} className="shrink-0">
-                                                Download
-                                                <Download className="h-4 w-4 ml-2" />
-                                            </Button>
-                                        )}
+                                        <button 
+                                            onClick={() => {
+                                                downloadCertificatePDF(result.cert.certId);
+                                                setResult(prev => ({ ...prev, downloaded: true }));
+                                            }}
+                                            className="bg-primary text-white hover:bg-primary-container px-6 py-4 flex items-center justify-center gap-3 transition-colors shrink-0 outline-none w-full md:w-auto"
+                                        >
+                                            <span className="text-[11px] font-bold uppercase tracking-[0.15em]">
+                                                {result.downloaded ? 'Re-Download' : 'Download PDF'}
+                                            </span>
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                {result.downloaded ? 'download_done' : 'download'}
+                                            </span>
+                                        </button>
                                     </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                            <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">{t('verify.results.id')}</p>
-                                            <p className="font-mono text-sm text-[var(--theme-text-primary)]">{result.cert.certId}</p>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-outline-variant/30 border-[0.5px] border-outline-variant/30 w-full mt-4">
+                                        <div className="bg-surface p-6">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Reference ID</p>
+                                            <p className="font-mono text-sm font-bold text-on-surface">{result.cert.certId}</p>
                                         </div>
-
-                                        <div className="p-4 rounded-xl bg-[var(--theme-success-bg)]">
-                                            <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Status</p>
-                                            <p className="text-sm font-bold text-[var(--theme-success-text)]">VALID</p>
+                                        <div className="bg-surface p-6">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Validated By</p>
+                                            <p className="font-body text-sm font-bold text-on-surface">CertiVerify Secure Protocol</p>
                                         </div>
-
-                                        {result.cert.name && (
-                                            <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                                <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
-                                                    <User className="h-5 w-5 text-[var(--theme-accent-primary)]" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Certificate Holder</p>
-                                                    <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.name}</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {result.cert.course && (
-                                            <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--theme-hover-surface)]">
-                                                <div className="h-10 w-10 rounded-lg bg-[var(--theme-accent-soft-bg)] flex items-center justify-center shrink-0">
-                                                    <Award className="h-5 w-5 text-[var(--theme-accent-primary)]" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Domain</p>
-                                                    <p className="font-semibold text-[var(--theme-text-primary)]">{result.cert.course}</p>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ) : (
-                            <Card>
-                                <CardContent className="pt-10 pb-10 text-center">
-                                    <div className={`h-20 w-20 rounded-2xl mx-auto mb-6 flex items-center justify-center ${result.revoked ? 'bg-[var(--theme-warning-bg)]' : 'bg-[var(--theme-error-bg)]'}`}>
-                                        <XCircle className={`h-10 w-10 ${result.revoked ? 'text-[var(--theme-warning-text)]' : 'text-[var(--theme-error-text)]'}`} />
+                            <div className="bg-error/5 border-[0.5px] border-error/30 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-error"></div>
+                                <div className="p-8 md:p-12 text-center">
+                                    <div className="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-6">
+                                        <span className="material-symbols-outlined text-error text-4xl">error</span>
                                     </div>
-                                    <h3 className={`text-2xl font-bold mb-3 ${result.revoked ? 'text-[var(--theme-warning-text)]' : 'text-[var(--theme-error-text)]'}`}>
-                                        {result.revoked ? t('verify.errors.revoked') : 'INVALID CERTIFICATE'}
-                                    </h3>
-                                    <p className="text-[var(--theme-text-secondary)] text-base max-w-md mx-auto">
+                                    <h2 className="font-headline text-3xl text-error font-bold mb-4">Verification Failed</h2>
+                                    <p className="text-sm text-on-surface-variant font-body mb-8 max-w-sm mx-auto">
                                         {result.message}
                                     </p>
-                                </CardContent>
-                            </Card>
+                                    <div className="inline-flex items-center gap-2 border-[0.5px] border-error/20 bg-surface px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                                        Searched ID: <span className="font-mono text-error">{certId}</span>
+                                    </div>
+                                </div>
+                            </div>
                         )}
-                    </motion.div>
+                        
+                        <div className="mt-8 flex justify-center">
+                            <button onClick={() => {setSearched(false); setCertId(''); setResult(null);}} className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[14px]">refresh</span> Verify Another Document
+                            </button>
+                        </div>
+                    </div>
                 )}
             </div>
-        </div>
+            
+            {/* Background design elements */}
+            <div className="fixed top-1/2 left-0 w-64 h-64 border-[0.3px] border-outline-variant/20 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+            <div className="fixed top-1/2 right-0 w-[500px] h-[500px] border-[0.3px] border-outline-variant/20 rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        </main>
     );
 };
 

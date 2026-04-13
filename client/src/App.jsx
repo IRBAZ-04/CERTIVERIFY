@@ -146,7 +146,7 @@ function App() {
   return (
     <Router>
       <SessionTimeoutManager />
-      <div className="flex flex-col min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] relative">
+      <div className="flex flex-col min-h-screen bg-background text-on-surface relative selection:bg-primary-container selection:text-white">
         <CustomCursor />
         <Header />
         <main className="flex-grow">

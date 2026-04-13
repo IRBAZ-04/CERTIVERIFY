@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Certificate of Completion – AMDOX TECHNOLOGY</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -9,57 +9,186 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink:        #111827;
-      --ink-light:  #374151;
-      --ink-muted:  #6B7280;
-      --emerald:    #065F46;
-      --emerald-mid:#047857;
-      --emerald-lt: #D1FAE5;
-      --gold:       #92784A;
-      --gold-lt:    #C8A96E;
-      --bg:         #F7F7F5;
-      --border:     #E5E7EB;
-      --white:      #FFFFFF;
+      --ink:         #111827;
+      --ink-muted:   #6B7280;
+      --emerald:     #065F46;
+      --emerald-mid: #047857;
+      --emerald-lt:  #D1FAE5;
+      --gold:        #92784A;
+      --gold-lt:     #C8A96E;
+      --bg:          #F7F7F5;
+      --border:      #E5E7EB;
     }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: white;
+    @page { size: A4 landscape; margin: 0; padding: 0; }
+    
+    @media print {
+      * { page-break-inside: avoid !important; }
+      html { 
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body { 
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: auto !important;
+        display: block !important;
+        background: white !important;
+      }
+      .certificate-wrapper { 
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+      }
+      .sidebar, .cert-main { page-break-inside: avoid !important; }
+      .cert-content-wrap, .cert-bottom, .cert-strip, .cert-verify-bar { page-break-inside: avoid !important; }
+    }
+
+    body {
+      background: #D8D7D4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 30px;
       font-family: 'DM Sans', sans-serif;
     }
 
+    /* A4 Landscape: 1123 × 794 px */
     .certificate-wrapper {
-      width: 794px;
-      min-height: 1123px;
+      width: 1123px;
+      height: 794px;
       background: var(--bg);
+      position: relative;
+      box-shadow: 0 24px 80px rgba(0,0,0,.22), 0 4px 18px rgba(0,0,0,.1);
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+
+    /* ─── LEFT SIDEBAR ──────────────────────────────────────── */
+    .sidebar {
+      width: 226px;
+      flex-shrink: 0;
+      background: var(--emerald);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 18px 24px;
+      overflow: hidden;
+      z-index: 5;
+      height: 100%;
+    }
+
+    /* Top triangle overlay */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 130px;
+      background: rgba(0,0,0,.14);
+      clip-path: polygon(0 0, 100% 0, 100% 55%, 0 100%);
+      z-index: 0;
+    }
+    /* Bottom triangle overlay */
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 100px;
+      background: rgba(255,255,255,.055);
+      clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 100%);
+      z-index: 0;
+    }
+
+    .sb-top, .sb-mid, .sb-bottom {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sb-top { gap: 12px; }
+    .sb-mid  { gap: 12px; }
+    .sb-bottom { gap: 10px; }
+
+    .logo-mark {
+      width: 60px; height: 60px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .company-name-sb {
+      font-family: 'Playfair Display', serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.8px;
+      color: white;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .company-tagline-sb {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 7.5px;
+      font-weight: 300;
+      letter-spacing: 2.2px;
+      color: rgba(255,255,255,.6);
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .sb-rule {
+      width: 32px; height: 1px;
+      background: rgba(255,255,255,.25);
+    }
+
+    .sb-badge {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 28px;
+      padding: 3px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 2.2px;
+      color: rgba(255,255,255,.7);
+      text-transform: uppercase;
+    }
+
+    /* Seal SVG on sidebar */
+    .seal-wrap { margin-top: 2px; }
+
+    /* ─── RIGHT MAIN PANEL ──────────────────────────────────── */
+    .cert-main {
+      flex: 1;
       position: relative;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-    }
-
-    .cert-corner {
-      position: absolute;
-      width: 56px; height: 56px;
-      border-color: var(--emerald);
-      border-style: solid;
-      opacity: .55;
-      z-index: 2;
-    }
-    .cert-corner.tl { top: 28px; left: 28px;  border-width: 2px 0 0 2px; }
-    .cert-corner.tr { top: 28px; right: 28px; border-width: 2px 2px 0 0; }
-    .cert-corner.bl { bottom: 28px; left: 28px;  border-width: 0 0 2px 2px; }
-    .cert-corner.br { bottom: 28px; right: 28px; border-width: 0 2px 2px 0; }
-
-    .cert-frame {
-      position: absolute;
-      inset: 18px;
+      margin: 14px 14px 0 14px;
       border: 1px solid var(--border);
-      pointer-events: none;
-      z-index: 1;
     }
 
+    /* Watermark (background decoration only) */
     .watermark {
       position: absolute;
       inset: 0;
@@ -71,336 +200,269 @@
     }
     .watermark-text {
       font-family: 'Playfair Display', serif;
-      font-size: 180px;
+      font-size: 260px;
       font-weight: 700;
       color: var(--emerald);
-      opacity: .03;
-      letter-spacing: -4px;
+      opacity: .02;
+      letter-spacing: -6px;
       user-select: none;
     }
 
+    /* BG glow blobs */
     .bg-geo {
       position: absolute;
       pointer-events: none;
       z-index: 0;
+      border-radius: 50%;
     }
-    .bg-geo.top-right {
-      top: -60px; right: -60px;
+    .bg-geo.tr {
+      top: -70px; right: -70px;
       width: 300px; height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(6,95,70,.06) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(6,95,70,.04) 0%, transparent 70%);
     }
-    .bg-geo.bottom-left {
-      bottom: -60px; left: -60px;
-      width: 260px; height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(6,95,70,.05) 0%, transparent 70%);
+    .bg-geo.bc {
+      bottom: -50px; right: 180px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(146,120,74,.03) 0%, transparent 70%);
     }
 
-    .cert-body {
+    /* Hidden frame */
+    .cert-frame {
+      display: none;
+    }
+
+    /* Hidden corners - removed for cleaner look */
+    .cert-corner {
+      display: none;
+    }
+
+    /* ── Content ──────────────────────────────────────────── */
+    .cert-content-wrap {
       position: relative;
       z-index: 3;
-      display: flex;
-      flex-direction: column;
       flex: 1;
-      padding: 56px 72px 48px;
-    }
-
-    .cert-header {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 28px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .logo-mark {
-      width: 52px; height: 52px;
-      background: var(--emerald);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
-    }
-    .logo-mark svg {
-      width: 30px; height: 30px;
-      fill: none;
-      stroke: white;
-      stroke-width: 1.8;
+      align-items: center;
+      text-align: center;
+      padding: 32px 48px 24px 48px;
     }
 
-    .company-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 4px;
-      color: var(--ink);
-      text-transform: uppercase;
-    }
-
-    .company-tagline {
+    .cert-eyebrow {
       font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 300;
-      letter-spacing: 3px;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 3.5px;
       color: var(--emerald-mid);
       text-transform: uppercase;
+      margin-bottom: 8px;
+      font-size: 9px;
     }
 
-    .cert-title-section {
-      text-align: center;
-      padding: 36px 0 24px;
-    }
-
-    .cert-type-label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 10.5px;
-      font-weight: 500;
-      letter-spacing: 4px;
-      color: var(--emerald);
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .cert-main-title {
+    .cert-title {
       font-family: 'Playfair Display', serif;
-      font-size: 46px;
+      font-size: 42px;
       font-weight: 600;
-      line-height: 1.1;
+      line-height: 1.15;
       color: var(--ink);
-      letter-spacing: -0.5px;
+      letter-spacing: -.5px;
+      margin-bottom: 6px;
     }
-    .cert-main-title em {
+    .cert-title em {
       font-style: italic;
       color: var(--emerald);
     }
 
-    .title-rule {
+    .h-rule {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 20px auto 0;
-      width: fit-content;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0 18px;
     }
-    .title-rule-line {
-      width: 60px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold-lt));
-    }
-    .title-rule-line.right {
-      background: linear-gradient(90deg, var(--gold-lt), transparent);
-    }
-    .title-rule-diamond {
-      width: 6px; height: 6px;
-      background: var(--gold);
-      transform: rotate(45deg);
-    }
-
-    .cert-content {
-      text-align: center;
-      padding: 32px 40px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
+    .h-rule-diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink:0; }
+    .h-rule-line    { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-lt)); }
+    .h-rule-short   { width: 80px; height: 1px; background: linear-gradient(90deg, var(--gold-lt), transparent); }
 
     .cert-preamble {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 300;
       color: var(--ink-muted);
-      letter-spacing: .4px;
-      margin-bottom: 16px;
+      letter-spacing: .3px;
+      margin-bottom: 8px;
     }
 
     .recipient-name {
       font-family: 'Playfair Display', serif;
       font-size: 44px;
-      font-weight: 600;
+      font-weight: 700;
       font-style: italic;
       color: var(--ink);
-      line-height: 1.15;
+      line-height: 1.1;
       letter-spacing: -.5px;
+      margin-bottom: 14px;
       position: relative;
-      display: inline-block;
-      padding-bottom: 10px;
-      margin-bottom: 4px;
+      display: block;
     }
     .recipient-name::after {
       content: '';
       display: block;
       height: 2px;
-      background: linear-gradient(90deg, transparent 0%, var(--emerald) 30%, var(--emerald) 70%, transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, var(--emerald) 35%, var(--emerald) 65%, transparent 100%);
       margin-top: 8px;
+      border-radius: 2px;
     }
 
     .cert-bridge {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 300;
       color: var(--ink-muted);
-      letter-spacing: .4px;
-      margin: 20px 0 10px;
+      letter-spacing: .3px;
+      margin-bottom: 10px;
     }
 
-    .domain-name {
+    .domain-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--emerald-lt);
+      border-left: 4px solid var(--emerald);
+      padding: 7px 22px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 16px;
+    }
+    .domain-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      flex-shrink: 0;
+    }
+    .domain-text {
       font-family: 'Playfair Display', serif;
-      font-size: 26px;
+      font-size: 19px;
       font-weight: 600;
       color: var(--emerald);
-      letter-spacing: .5px;
-      background: var(--emerald-lt);
-      padding: 8px 28px;
-      border-radius: 4px;
-      border-left: 3px solid var(--emerald);
-      margin-bottom: 24px;
-    }
-
-    .cert-body-remark {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15.5px;
-      font-weight: 300;
-      color: var(--ink-muted);
-      line-height: 1.6;
-      max-width: 480px;
-      letter-spacing: .2px;
-    }
-
-    .cert-details {
-      display: flex;
-      justify-content: center;
-      gap: 60px;
-      padding: 28px 0;
-      margin: 8px 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .detail-item {
-      text-align: center;
-    }
-    .detail-label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 9.5px;
-      font-weight: 500;
-      letter-spacing: 3px;
-      color: var(--emerald-mid);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .detail-value {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--ink);
       letter-spacing: .3px;
     }
 
-    .cert-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      padding-top: 32px;
-      gap: 24px;
+    .cert-remark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-muted);
+      line-height: 1.65;
+      max-width: 540px;
+      letter-spacing: .1px;
     }
 
+    /* ── Bottom bar ───────────────────────────────────────── */
+    .cert-bottom {
+      border-top: 1px solid var(--border);
+      padding: 16px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 4;
+      background: rgba(247,247,245,.98);
+      flex-shrink: 0;
+      min-height: 100px;
+    }
+
+    .details-group {
+      display: flex;
+      gap: 48px;
+      align-items: center;
+      flex: 1;
+    }
+    .details-group > div {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .detail-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 2.2px;
+      color: var(--emerald-mid);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .detail-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .sigs-group {
+      display: flex;
+      gap: 52px;
+      align-items: flex-end;
+      flex: 1;
+    }
     .sig-block {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 160px;
+      flex: 1;
     }
-    .sig-svg {
-      width: 120px;
-      height: 44px;
-      margin-bottom: 6px;
-    }
-    .sig-line {
-      width: 140px;
-      height: 1px;
-      background: var(--ink);
-      margin-bottom: 6px;
-      opacity: .35;
-    }
+    .sig-svg { width: 92px; height: 34px; margin-bottom: 4px; }
+    .sig-line { width: 110px; height: 1px; background: var(--ink); opacity: .28; margin-bottom: 4px; }
     .sig-label {
       font-family: 'DM Sans', sans-serif;
-      font-size: 9.5px;
+      font-size: 8px;
       font-weight: 500;
-      letter-spacing: 2.5px;
+      letter-spacing: 1.8px;
       color: var(--ink-muted);
       text-transform: uppercase;
       text-align: center;
+      line-height: 1.3;
     }
-    .sig-title {
+    .sig-role {
       font-family: 'DM Sans', sans-serif;
-      font-size: 9px;
+      font-size: 7px;
       color: var(--ink-muted);
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
+      opacity: .6;
       margin-top: 2px;
-      opacity: .7;
     }
 
-    .seal-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .seal-svg {
-      width: 90px; height: 90px;
-    }
-    .seal-caption {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: var(--emerald-mid);
-      text-transform: uppercase;
-      opacity: .8;
-      text-align: center;
-    }
-
+    /* ── Color strip ──────────────────────────────────────── */
     .cert-strip {
-      background: var(--ink);
-      height: 6px;
-      position: relative;
-      overflow: hidden;
-    }
-    .cert-strip::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg,
-        var(--emerald) 0%,
-        var(--emerald-mid) 40%,
-        var(--gold) 80%,
-        var(--gold-lt) 100%
-      );
-      opacity: .7;
+      height: 5px;
+      flex-shrink: 0;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--emerald-mid) 35%, var(--gold) 70%, var(--gold-lt) 100%);
+      z-index: 4;
     }
 
+    /* ── Verify bar ───────────────────────────────────────── */
     .cert-verify-bar {
-      background: white;
-      border-top: 1px solid var(--border);
-      padding: 10px 72px;
+      background: var(--ink);
+      padding: 6px 48px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
+      z-index: 4;
     }
     .verify-text {
       font-family: 'DM Sans', sans-serif;
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: var(--ink-muted);
+      font-size: 7px;
+      letter-spacing: 1.6px;
+      color: rgba(255,255,255,.4);
       text-transform: uppercase;
     }
     .verify-dot {
       width: 5px; height: 5px;
       border-radius: 50%;
-      background: var(--emerald);
+      background: #6EE7B7;
       display: inline-block;
       margin-right: 7px;
     }
@@ -410,132 +472,162 @@
 
 <div class="certificate-wrapper">
 
-  <div class="bg-geo top-right"></div>
-  <div class="bg-geo bottom-left"></div>
-  <div class="watermark" aria-hidden="true">
-    <span class="watermark-text">AT</span>
-  </div>
+  <!-- ═══ LEFT SIDEBAR ═══════════════════════════════════════ -->
+  <div class="sidebar">
 
-  <div class="cert-frame"></div>
-  <div class="cert-corner tl"></div>
-  <div class="cert-corner tr"></div>
-  <div class="cert-corner bl"></div>
-  <div class="cert-corner br"></div>
-
-  <div class="cert-body">
-
-    <header class="cert-header">
+    <div class="sb-top">
       <div class="logo-mark">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="12,2 22,8 22,16 12,22 2,16 2,8" stroke="white" stroke-width="1.6" fill="none"/>
-          <line x1="12" y1="2" x2="12" y2="22" stroke="white" stroke-width="1.2" opacity=".6"/>
-          <line x1="2" y1="8" x2="22" y2="8" stroke="white" stroke-width="1" opacity=".4"/>
-          <line x1="2" y1="16" x2="22" y2="16" stroke="white" stroke-width="1" opacity=".4"/>
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,3 33,12 33,24 18,33 3,24 3,12" stroke="white" stroke-width="1.8" fill="none"/>
+          <line x1="18" y1="3"  x2="18" y2="33" stroke="white" stroke-width="1.2" opacity=".5"/>
+          <line x1="3"  y1="12" x2="33" y2="12" stroke="white" stroke-width="1"   opacity=".35"/>
+          <line x1="3"  y1="24" x2="33" y2="24" stroke="white" stroke-width="1"   opacity=".35"/>
         </svg>
       </div>
-      <div class="company-name">AMDOX TECHNOLOGY</div>
-      <div class="company-tagline">Empowering Future Innovators</div>
-    </header>
-
-    <div class="cert-title-section">
-      <div class="cert-type-label">Official Recognition</div>
-      <h1 class="cert-main-title">Certificate of <em>Completion</em></h1>
-      <div class="title-rule">
-        <div class="title-rule-line"></div>
-        <div class="title-rule-diamond"></div>
-        <div class="title-rule-line right"></div>
-      </div>
+      <div class="company-name-sb">AMDOX<br>TECHNOLOGY</div>
+      <div class="company-tagline-sb">Empowering Future<br>Innovators</div>
     </div>
 
-    <div class="cert-content">
+    <div class="sb-mid">
+      <div class="sb-rule"></div>
+      <div class="sb-badge">Official Document</div>
+      <div class="sb-rule"></div>
+    </div>
+
+    <div class="sb-bottom">
+      <!-- Seal -->
+      <div class="seal-wrap">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="44" cy="44" r="40" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>
+          <circle cx="44" cy="44" r="34" fill="none" stroke="rgba(255,255,255,.14)" stroke-width=".7"/>
+          <circle cx="44" cy="44" r="40" fill="none" stroke="rgba(255,255,255,.18)"
+            stroke-width="4.5" stroke-dasharray="2.5 6.5" stroke-linecap="round"/>
+          <circle cx="44" cy="44" r="27" fill="rgba(255,255,255,.055)"/>
+          <polygon points="44,20 57,27.5 57,42.5 44,50 31,42.5 31,27.5"
+            fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>
+          <text x="44" y="38" text-anchor="middle"
+            font-family="Playfair Display,serif" font-size="10" font-weight="700"
+            fill="white" opacity=".85" letter-spacing="1">AT</text>
+          <path id="sarc" d="M 13,44 A 31,31 0 0,0 75,44" fill="none"/>
+          <text font-family="DM Sans,sans-serif" font-size="5.8" fill="white" opacity=".5" letter-spacing="1.2">
+            <textPath href="#sarc" startOffset="6%">AMDOX TECHNOLOGY · VERIFIED</textPath>
+          </text>
+          <text x="44" y="72" text-anchor="middle" font-size="7.5" fill="rgba(200,169,110,.65)">★ ★ ★</text>
+        </svg>
+      </div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:7.5px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;text-align:center;">Official Seal</div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+
+  <!-- ═══ RIGHT PANEL ═════════════════════════════════════════ -->
+  <div class="cert-main">
+
+    <!-- BG decorations -->
+    <div class="bg-geo tr"></div>
+    <div class="bg-geo bc"></div>
+    <div class="watermark" aria-hidden="true"><span class="watermark-text">AT</span></div>
+
+    <!-- Frame & corners -->
+    <div class="cert-frame"></div>
+    <div class="cert-corner tr"></div>
+    <div class="cert-corner br"></div>
+    <div class="cert-corner tl"></div>
+    <div class="cert-corner bl"></div>
+
+    <!-- Main text content -->
+    <div class="cert-content-wrap">
+
+      <div class="cert-eyebrow">Official Recognition &nbsp;·&nbsp; AMDOX TECHNOLOGY</div>
+
+      <h1 class="cert-title">Certificate of <em>Completion</em></h1>
+
+      <div class="h-rule">
+        <div class="h-rule-diamond"></div>
+        <div class="h-rule-line"></div>
+        <div class="h-rule-short"></div>
+      </div>
+
       <p class="cert-preamble">This is to certify that</p>
 
       <div class="recipient-name">{{name}}</div>
 
       <p class="cert-bridge">has successfully completed the training program in</p>
 
-      <div class="domain-name">{{domain}}</div>
+      <div class="domain-pill">
+        <div class="domain-dot"></div>
+        <div class="domain-text">{{domain}}</div>
+      </div>
 
-      <p class="cert-body-remark">
+      <p class="cert-remark">
         demonstrating exceptional commitment, dedication, and proficiency in the subject matter,
-        and is hereby awarded this certificate in recognition of their achievement.
+        and is hereby awarded this certificate in recognition of their outstanding achievement.
       </p>
+
+    </div><!-- /cert-content-wrap -->
+
+    <!-- Details + Signatures -->
+    <div class="cert-bottom">
+
+      <div class="details-group">
+        <div>
+          <div class="detail-label">Certificate ID</div>
+          <div class="detail-value">{{certificateId}}</div>
+        </div>
+        <div>
+          <div class="detail-label">Date of Issue</div>
+          <div class="detail-value">{{date}}</div>
+        </div>
+        <div>
+          <div class="detail-label">Issued By</div>
+          <div class="detail-value">AMDOX TECHNOLOGY</div>
+        </div>
+      </div>
+
+      <div class="sigs-group">
+
+        <div class="sig-block">
+          <svg class="sig-svg" viewBox="0 0 96 34" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5,25 C15,13 21,30 33,19 C43,8 47,27 59,21 C67,17 73,29 87,23 C91,21 94,17 95,13"
+              fill="none" stroke="#111827" stroke-width="1.3" stroke-linecap="round" opacity=".48"/>
+            <path d="M11,29 C21,19 29,13 39,19 C49,25 55,9 65,15 C75,21 83,29 93,21"
+              fill="none" stroke="#111827" stroke-width=".8" stroke-linecap="round" opacity=".2"/>
+          </svg>
+          <div class="sig-line"></div>
+          <div class="sig-label">Director, Training &amp; Dev.</div>
+          <div class="sig-role">AMDOX TECHNOLOGY</div>
+        </div>
+
+        <div class="sig-block">
+          <svg class="sig-svg" viewBox="0 0 96 34" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4,21 C14,9 20,29 32,23 C42,17 48,7 58,15 C68,23 74,31 88,25 C92,23 94,19 95,11"
+              fill="none" stroke="#111827" stroke-width="1.3" stroke-linecap="round" opacity=".48"/>
+            <path d="M10,27 C20,17 28,11 40,17 C52,23 58,7 70,13 C80,19 88,27 94,19"
+              fill="none" stroke="#111827" stroke-width=".8" stroke-linecap="round" opacity=".2"/>
+          </svg>
+          <div class="sig-line"></div>
+          <div class="sig-label">Chief Executive Officer</div>
+          <div class="sig-role">AMDOX TECHNOLOGY</div>
+        </div>
+
+      </div>
+
+    </div><!-- /cert-bottom -->
+
+    <!-- Color strip -->
+    <div class="cert-strip"></div>
+
+    <!-- Verify bar -->
+    <div class="cert-verify-bar">
+      <span class="verify-text"><span class="verify-dot"></span>Verified &amp; Issued by AMDOX TECHNOLOGY</span>
+      <span class="verify-text">Certificate ID: {{certificateId}}</span>
+      <span class="verify-text">amdoxtechnology.com</span>
     </div>
 
-    <div class="cert-details">
-      <div class="detail-item">
-        <div class="detail-label">Certificate ID</div>
-        <div class="detail-value">{{certificateId}}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">Date of Issue</div>
-        <div class="detail-value">{{date}}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">Issued By</div>
-        <div class="detail-value">AMDOX TECHNOLOGY</div>
-      </div>
-    </div>
+  </div><!-- /cert-main -->
 
-    <footer class="cert-footer">
-
-      <div class="sig-block">
-        <svg class="sig-svg" viewBox="0 0 120 44" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10,32 C20,20 28,38 40,22 C50,8 55,34 68,28 C78,22 82,36 95,30 C100,28 108,24 114,18"
-            fill="none" stroke="#111827" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
-          <path d="M18,38 C26,30 34,20 44,26 C52,32 58,14 70,20 C80,26 88,32 102,22"
-            fill="none" stroke="#111827" stroke-width="1" stroke-linecap="round" opacity=".25"/>
-        </svg>
-        <div class="sig-line"></div>
-        <div class="sig-label">Director, Training &amp; Development</div>
-        <div class="sig-title">AMDOX TECHNOLOGY</div>
-      </div>
-
-      <div class="seal-block">
-        <svg class="seal-svg" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="45" cy="45" r="41" fill="none" stroke="#065F46" stroke-width="1.5" opacity=".5"/>
-          <circle cx="45" cy="45" r="36" fill="none" stroke="#065F46" stroke-width=".7" opacity=".35"/>
-          <circle cx="45" cy="45" r="41" fill="none" stroke="#065F46" stroke-width="5"
-            stroke-dasharray="3 7.5" stroke-linecap="round" opacity=".3"/>
-          <circle cx="45" cy="45" r="30" fill="#065F46" opacity=".08"/>
-          <polygon points="45,20 60,28 60,44 45,52 30,44 30,28"
-            fill="none" stroke="#065F46" stroke-width="1.4" opacity=".7"/>
-          <text x="45" y="41" text-anchor="middle"
-            font-family="Playfair Display, serif" font-size="11" font-weight="700"
-            fill="#065F46" opacity=".9" letter-spacing="1">AT</text>
-          <path id="arc-bottom" d="M 10,45 A 35,35 0 0,0 80,45" fill="none"/>
-          <text font-family="DM Sans, sans-serif" font-size="6.5" fill="#065F46" opacity=".7" letter-spacing="1.5">
-            <textPath href="#arc-bottom" startOffset="10%">AMDOX TECHNOLOGY · VERIFIED</textPath>
-          </text>
-          <text x="45" y="74" text-anchor="middle" font-size="8" fill="#92784A" opacity=".6">★ ★ ★</text>
-        </svg>
-        <div class="seal-caption">Official Seal</div>
-      </div>
-
-      <div class="sig-block">
-        <svg class="sig-svg" viewBox="0 0 120 44" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8,26 C18,16 24,36 36,30 C46,24 52,10 64,18 C74,26 80,38 94,32 C102,28 110,20 116,14"
-            fill="none" stroke="#111827" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
-          <path d="M14,34 C24,24 32,18 44,22 C56,28 60,12 72,18 C82,24 92,34 106,26"
-            fill="none" stroke="#111827" stroke-width="1" stroke-linecap="round" opacity=".25"/>
-        </svg>
-        <div class="sig-line"></div>
-        <div class="sig-label">Chief Executive Officer</div>
-        <div class="sig-title">AMDOX TECHNOLOGY</div>
-      </div>
-
-    </footer>
-  </div>
-
-  <div class="cert-strip"></div>
-
-  <div class="cert-verify-bar">
-    <span class="verify-text"><span class="verify-dot"></span>Verified &amp; Issued by AMDOX TECHNOLOGY</span>
-    <span class="verify-text">Certificate ID: {{certificateId}}</span>
-    <span class="verify-text">amdoxtechnology.com</span>
-  </div>
-
-</div>
+</div><!-- /certificate-wrapper -->
 
 </body>
 </html>

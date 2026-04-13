@@ -196,29 +196,29 @@ const downloadCertificate = async (req, res) => {
     let browser = null;
     try {
         const cert = await Certificate.findOne({ certId: req.params.id });
-        if (!cert) return res.status(404).json({ message: "Not found" });
+        if (!cert) return res.status(404).json({ message: "Certificate not found" });
 
-        // 1. Load HTML template
         const templatePath = path.join(__dirname, '..', 'templates', 'certificate.html');
         let html = fs.readFileSync(templatePath, 'utf8');
 
-        // 2. Replace placeholders with actual certificate data
-        html = html.replace(/\{\{name\}\}/g, cert.name);
-        html = html.replace(/\{\{domain\}\}/g, cert.course);
+        html = html.replace(/\{\{name\}\}/g, cert.name || 'Unknown');
+        html = html.replace(/\{\{domain\}\}/g, cert.course || 'N/A');
         html = html.replace(/\{\{certificateId\}\}/g, cert.certId);
-        html = html.replace(/\{\{date\}\}/g, cert.date || '');
+        html = html.replace(/\{\{date\}\}/g, cert.date || new Date().toISOString().split('T')[0]);
 
-        // 3. Launch Puppeteer and render HTML to PDF
         browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage'
+            ],
+            timeout: 30000
         });
+
         const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
-        // Set content and wait for Google Fonts to load
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-
-        // Generate PDF — A4 portrait, matching the template design
         const pdfBuffer = await page.pdf({
             width: '794px',
             height: '1123px',
@@ -229,22 +229,23 @@ const downloadCertificate = async (req, res) => {
         await browser.close();
         browser = null;
 
-        // 4. Set headers for cross-device download compatibility
-        const filename = encodeURIComponent(cert.certId) + '.pdf';
+        const filename = `${cert.certId}.pdf`;
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${filename}`);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Length', pdfBuffer.length);
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         res.end(pdfBuffer);
 
     } catch (err) {
-        if (browser) { try { await browser.close(); } catch { } }
+        console.error('PDF generation error:', err.message);
+        if (browser) { 
+            try { await browser.close(); } catch (e) { console.error('Browser close error:', e.message); } 
+        }
         if (!res.headersSent) {
-            res.status(500).json({ message: err.message });
+            res.status(500).json({ message: 'Failed to generate PDF: ' + err.message });
         } else {
-            console.error('Error during PDF generation:', err);
             res.end();
         }
     }
