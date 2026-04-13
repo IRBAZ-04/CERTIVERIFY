@@ -3,7 +3,11 @@ const dotenv = require('dotenv');
 const qrcode = require('qrcode');
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URI || "mongodb+srv://USER:PASSWORD@cluster0.abc.mongodb.net/certiverify") // we will see if env var works
+if (!process.env.MONGO_URI) {
+  throw new Error('MONGO_URI environment variable is required. Please set it in .env file.');
+}
+
+mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
      console.log("Connected to DB.");
      const Certificate = require('./models/Certificate');
