@@ -19,7 +19,7 @@ app.use(morgan('dev'));
 
 // Body parsers
 app.use(cors({
-  origin: "*", // allow all (for now)
+  origin: process.env.FRONTEND_URL || 'https://certiverify-eight.vercel.app',
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
