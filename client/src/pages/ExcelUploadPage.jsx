@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Upload, FileSpreadsheet, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import API from '../services/api';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -8,7 +9,7 @@ import { motion } from 'framer-motion';
 
 const ExcelUploadPage = () => {
   const navigate = useNavigate();
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+  const { user, isAdmin } = useAuth();
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
@@ -16,14 +17,14 @@ const ExcelUploadPage = () => {
   const [uploadSummary, setUploadSummary] = useState(null);
 
   useEffect(() => {
-    if (!userInfo?.token) {
+    if (!user) {
       navigate('/login');
       return;
     }
-    if (userInfo.role !== 'admin' && userInfo.role !== 'SUPER_ADMIN') {
+    if (!isAdmin) {
       navigate('/user-dashboard');
     }
-  }, [navigate]);
+  }, [user, isAdmin, navigate]);
 
   const onUpload = async (e) => {
     e.preventDefault();

@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         updateUserInfo,
-        isAdmin: user?.role === 'ADMIN',
+        isAdmin: user?.role?.toLowerCase() === 'admin' || user?.role?.toUpperCase() === 'SUPER_ADMIN',
         isLoggedIn: !!user
     };
 

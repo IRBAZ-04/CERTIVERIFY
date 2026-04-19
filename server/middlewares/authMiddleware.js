@@ -21,7 +21,7 @@ const protect = (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-    if (req.user && req.user.role === "ADMIN") {
+    if (req.user && (req.user.role?.toLowerCase() === "admin" || req.user.role?.toUpperCase() === "SUPER_ADMIN")) {
         next();
     } else {
         return res.status(403).json({ msg: "Forbidden: Admin access required" });
