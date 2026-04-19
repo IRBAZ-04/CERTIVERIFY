@@ -238,7 +238,7 @@ const downloadCertificate = async (req, res) => {
 
         browser = await puppeteer.launch({
             headless: true,
-            executablePath: puppeteer.executablePath(), // 🔥 FORCE correct path
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
