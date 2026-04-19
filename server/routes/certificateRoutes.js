@@ -11,7 +11,7 @@ const { protect, adminOnly } = require('../middlewares/authMiddleware');
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" }); // Temp folder
 
-router.get('/verify/:id', protect, verifyCertificate);
+router.get('/verify/:id', verifyCertificate);
 router.get('/download/:id', downloadCertificate);
 
 router.route('/')

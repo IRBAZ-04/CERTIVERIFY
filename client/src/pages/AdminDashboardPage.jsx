@@ -2,10 +2,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { downloadCertificatePDF } from '../utils/downloadUtils';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboardPage = () => {
     const navigate = useNavigate();
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    const { user, logout, isAdmin } = useAuth();
     
     // Create Mode State
     const [form, setForm] = useState({ certificateId: '', studentName: '', course: '', date: '' });
@@ -38,24 +39,25 @@ const AdminDashboardPage = () => {
             setTotalCertificates(data.total);
         } catch (err) {
             if (err.response?.status === 401) {
-                localStorage.removeItem('userInfo');
+                logout();
                 navigate('/login');
             }
         } finally {
             setLoading(false);
         }
-    }, [page, search, navigate]);
+    }, [page, search, navigate, logout]);
 
     useEffect(() => {
-        if (!userInfo?.token) {
+        if (!user) {
             navigate('/login');
             return;
         }
-        if (userInfo.role !== 'admin' && userInfo.role !== 'SUPER_ADMIN') {
+        if (!isAdmin) {
             navigate('/user-dashboard');
+            return;
         }
         fetchCertificates();
-    }, [navigate, fetchCertificates]);
+    }, [user, isAdmin, navigate, fetchCertificates]);
 
     const handleSearchChange = (value) => {
         setSearch(value);
@@ -111,7 +113,7 @@ const AdminDashboardPage = () => {
                             <div className="flex justify-between items-end mb-12">
                                 <div>
                                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-2 block">System Overview</span>
-                                    <h1 className="text-5xl font-headline font-normal tracking-tight text-on-surface">Admin Dashboard</h1>
+                                    <h1 className="text-5xl font-headline font-normal tracking-tight text-on-surface">Admin Dashboard ({user?.role})</h1>
                                 </div>
                                 <div className="flex gap-4">
                                     <div className="text-right hidden sm:block">

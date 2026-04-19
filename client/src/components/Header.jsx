@@ -2,11 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import API from '../services/api';
 import { useTheme } from '../theme/ThemeProvider';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isDark, toggle } = useTheme();
+    const { user, logout, isAdmin } = useAuth();
+    
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -15,9 +18,6 @@ const Header = () => {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [changingPassword, setChangingPassword] = useState(false);
     const profileMenuRef = useRef(null);
-    
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-    const isAdmin = userInfo && userInfo.role === 'admin';
 
     const handleLogout = async () => {
         try {
@@ -25,9 +25,8 @@ const Header = () => {
         } catch {
             // Ignore errors and clear local state
         } finally {
-            localStorage.removeItem('userInfo');
-            localStorage.removeItem('sessionStart');
-            window.location.href = '/';
+            logout();
+            navigate('/login');
         }
     };
 
@@ -86,15 +85,18 @@ const Header = () => {
                 </Link>
                 
                 <div className="hidden md:flex items-center gap-10 font-label text-sm uppercase tracking-[0.05em] font-bold">
-                    {userInfo ? (
+                    {user ? (
                         <Link to="/verify" className={isActive('/verify') || isActive('/search') ? activeClass : inactiveClass}>
                             Verify
                         </Link>
                     ) : null}
-                    {userInfo && isAdmin && (
+                    {user && isAdmin && (
                         <Link to="/admin-dashboard" className={isActive('/admin-dashboard') || isActive('/upload-excel') ? activeClass : inactiveClass}>
                             Dashboard
                         </Link>
+                    )}
+                    {user && !isAdmin && (
+                        <div className="hidden"></div>
                     )}
                 </div>
 
@@ -107,22 +109,22 @@ const Header = () => {
                             {isDark ? 'light_mode' : 'dark_mode'}
                         </span>
                     </button>
-                    {userInfo ? (
+                    {user ? (
                         <div className="relative" ref={profileMenuRef}>
                             <button 
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg border-[0.5px] border-outline-variant bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors"
                             >
                                 <span className="material-symbols-outlined text-[20px]">account_circle</span>
-                                <span className="text-sm font-medium hidden sm:inline">{userInfo.name || userInfo.email}</span>
+                                <span className="text-sm font-medium hidden sm:inline">{user.name || user.email}</span>
                             </button>
 
                             {showProfileMenu && (
                                 <div className="absolute right-0 mt-2 w-56 bg-surface border-[0.5px] border-outline-variant rounded-lg shadow-lg z-50">
                                     <div className="px-4 py-4 border-b-[0.5px] border-outline-variant">
-                                        <p className="text-sm font-bold text-on-surface">{userInfo.name || 'User'}</p>
-                                        <p className="text-xs text-on-surface/60 mt-1">{userInfo.email}</p>
-                                        <p className="text-xs text-primary mt-2 uppercase font-bold">{userInfo.role}</p>
+                                        <p className="text-sm font-bold text-on-surface">{user.name || 'User'}</p>
+                                        <p className="text-xs text-on-surface/60 mt-1">{user.email}</p>
+                                        <p className="text-xs text-primary mt-2 uppercase font-bold tracking-widest">{user.role}</p>
                                     </div>
                                     <button
                                         onClick={() => {
@@ -191,7 +193,7 @@ const Header = () => {
                             <div className="p-6 bg-primary/10 border-[0.5px] border-primary rounded-lg flex items-center justify-between">
                                 <div>
                                     <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Name</p>
-                                    <p className="text-lg font-bold text-on-surface mt-2">{userInfo.name || 'User'}</p>
+                                    <p className="text-lg font-bold text-on-surface mt-2">{user?.name || 'User'}</p>
                                 </div>
                                 <span className="material-symbols-outlined text-[32px] text-primary">{isAdmin ? 'admin_panel_settings' : 'person'}</span>
                             </div>
@@ -199,8 +201,8 @@ const Header = () => {
                             <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
                                 <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Email Address</p>
                                 <p className="text-base text-on-surface font-semibold mt-2 break-all flex items-center gap-2">
-                                    {userInfo.email ? (
-                                        userInfo.email
+                                    {user?.email ? (
+                                        user.email
                                     ) : (
                                         <span className="text-on-surface/50 text-sm italic">Not recorded in current session</span>
                                     )}
@@ -209,7 +211,7 @@ const Header = () => {
 
                             <div className="p-6 border-[0.5px] border-outline-variant rounded-lg">
                                 <p className="text-[11px] font-bold font-label uppercase tracking-[0.05em] text-on-surface/70">Account Role</p>
-                                <p className="text-base text-primary mt-2 font-bold uppercase">{userInfo.role || 'User'}</p>
+                                <p className="text-base text-primary mt-2 font-black tracking-widest uppercase">{user?.role || 'Guest'}</p>
                             </div>
 
                             <div className="p-6 bg-primary/5 border-[0.5px] border-primary/30 rounded-lg">

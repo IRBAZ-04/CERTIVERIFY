@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CustomCursor from './components/ui/CustomCursor';
@@ -12,6 +13,8 @@ import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ExcelUploadPage from './pages/ExcelUploadPage';
 import VerifyPage from './pages/VerifyPage';
+import AdminRoute from './components/auth/AdminRoute';
+import UserRoute from './components/auth/UserRoute';
 
 const pageVariants = {
   initial: { opacity: 0, y: 15 },
@@ -19,9 +22,12 @@ const pageVariants = {
   exit: { opacity: 0, y: -10, transition: { duration: 0.3, ease: "easeIn" } },
 };
 
+import { useAuth } from './context/AuthContext';
+
 // Session Timeout Component — 10 min inactivity auto-logout with warning
 function SessionTimeoutManager() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const timeoutRef = useRef(null);
   const warningRef = useRef(null);
   const toastRef = useRef(null);
@@ -58,15 +64,13 @@ function SessionTimeoutManager() {
 
   const doLogout = () => {
     clearTimers();
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('sessionStart');
+    logout();
     window.location.href = '/login';
   };
 
   const resetTimeout = () => {
     clearTimers();
-    const userInfo = localStorage.getItem('userInfo');
-    if (!userInfo) return;
+    if (!user) return;
 
     // Update last activity timestamp
     localStorage.setItem('sessionStart', Date.now().toString());
@@ -83,8 +87,7 @@ function SessionTimeoutManager() {
   };
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
-    if (!userInfo) return;
+    if (!user) return;
 
     // Check if session already expired (e.g. after page refresh)
     const sessionStart = localStorage.getItem('sessionStart');
@@ -108,7 +111,7 @@ function SessionTimeoutManager() {
       clearTimers();
       activities.forEach(activity => document.removeEventListener(activity, eventListener));
     };
-  }, [navigate]);
+  }, [user]);
 
   return null;
 }
@@ -130,12 +133,20 @@ function AnimatedRoutes() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/user-dashboard" element={<UserDashboardPage />} />
-          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
-          <Route path="/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/upload-excel" element={<ExcelUploadPage />} />
-          <Route path="/search" element={<VerifyPage />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/search" element={<VerifyPage />} />
+
+          {/* User Protected Routes */}
+          <Route element={<UserRoute />}>
+              <Route path="/user-dashboard" element={<UserDashboardPage />} />
+          </Route>
+
+          {/* Admin Protected Routes */}
+          <Route element={<AdminRoute />}>
+              <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+              <Route path="/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/upload-excel" element={<ExcelUploadPage />} />
+          </Route>
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -144,17 +155,19 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <Router>
-      <SessionTimeoutManager />
-      <div className="flex flex-col min-h-screen bg-background text-on-surface relative selection:bg-primary-container selection:text-white">
-        <CustomCursor />
-        <Header />
-        <main className="flex-grow">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <SessionTimeoutManager />
+        <div className="flex flex-col min-h-screen bg-background text-on-surface relative selection:bg-primary-container selection:text-white">
+          <CustomCursor />
+          <Header />
+          <main className="flex-grow">
+            <AnimatedRoutes />
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

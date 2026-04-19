@@ -18,8 +18,24 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan('dev'));
 
 // Body parsers
+// CORS config
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://certiverify-eight.vercel.app',
+  'https://certiverify-ai.vercel.app',
+  'http://localhost:5173'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://certiverify-eight.vercel.app',
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      console.log(`[CORS Blocked] Origin not allowed: ${origin}`);
+      return callback(new Error('CORS Policy mismatch'), false);
+    }
+    return callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));

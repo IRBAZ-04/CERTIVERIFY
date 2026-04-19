@@ -7,15 +7,24 @@ const registerUser = async (req, res) => {
         let { name, email, password, adminPasscode } = req.body;
         email = email.toLowerCase();
         
-        // Assign role: only admin if correct passcode provided
-        const role = (adminPasscode === 'AmdoxAdmin9870') ? 'admin' : 'user';
+        // Assign role: only admin if correct passcode provided (from env)
+        const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'AmdoxAdmin9870';
+        const role = (adminPasscode && adminPasscode === ADMIN_PASSCODE) ? 'ADMIN' : 'USER';
 
         const hashed = await bcrypt.hash(password, 10);
         const user = await User.create({ name, email, password: hashed, role });
 
         const token = jwt.sign({ id: user._id, role: user.role, name: user.name, email: user.email }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
         
-        res.json({ token, role: user.role, name: user.name, email: user.email });
+        res.json({ 
+            token, 
+            user: {
+                id: user._id,
+                role: user.role,
+                name: user.name,
+                email: user.email
+            }
+        });
     } catch (err) {
         if (err.code === 11000) {
             return res.status(400).json({ message: 'Email already registered. Please login instead.' });
@@ -27,24 +36,48 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         let { email, password } = req.body;
-        email = email.toLowerCase();
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        email = email.toLowerCase().trim();
         const user = await User.findOne({ email });
         
         if (!user) {
-            console.log(`[Login Failed] User not found for email: ${email}`);
-            return res.status(401).json({ message: "Invalid credentials" });
+            console.log(`[Auth failed] User not found: ${email}`);
+            return res.status(401).json({ message: "Invalid email or password" });
         }
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
-            console.log(`[Login Failed] Password mismatch for email: ${email}. Provided password length: ${password?.length}, stored password length: ${user.password?.length}`);
-            return res.status(401).json({ message: "Invalid credentials" });
+            console.log(`[Auth failed] Incorrect password for: ${email}`);
+            return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role, name: user.name, email: user.email }, process.env.JWT_SECRET || 'SECRET', { expiresIn: '30d' });
-        res.json({ token, role: user.role, name: user.name, email: user.email });
+        // Use strict check for JWT_SECRET
+        if (!process.env.JWT_SECRET) {
+            console.warn("[Auth Warning] JWT_SECRET is not set. Using insecure default 'SECRET'.");
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, name: user.name, email: user.email }, 
+            process.env.JWT_SECRET || 'SECRET', 
+            { expiresIn: '30d' }
+        );
+
+        console.log(`[Auth Success] User logged in: ${email} (${user.role})`);
+        res.json({ 
+            token, 
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            }
+        });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(`[Login Error] ${err.message}`);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -85,7 +118,16 @@ const updatePassword = async (req, res) => {
             { expiresIn: '30d' }
         );
         
-        res.json({ message: 'Password updated successfully', token, role: user.role, name: user.name, email: user.email });
+        res.json({ 
+            message: 'Password updated successfully', 
+            token, 
+            user: {
+                id: user._id,
+                role: user.role,
+                name: user.name,
+                email: user.email
+            }
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, ShieldAlert, ShieldCheck, Eye, EyeOff, User, Crown } from 'lucide-react';
 import API from '../services/api';
@@ -7,15 +7,23 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [loginType, setLoginType] = useState('user');
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
+    const { login, user } = useAuth();
+    
+    useEffect(() => {
+        if (user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,24 +36,28 @@ const LoginPage = () => {
                 password: formData.password
             });
             
-            if (loginType === 'admin' && data.role !== 'admin') {
-                setError('Access denied. This account does not have admin privileges.');
-                localStorage.removeItem('userInfo');
-                localStorage.removeItem('sessionStart');
+            const userRole = data.user.role;
+
+            // STRICT ROLE ENFORCEMENT
+            if (loginType === 'admin' && userRole !== 'ADMIN') {
+                setError('Access denied. This account does not have administrative privileges.');
+                setLoading(false);
+                return;
+            }
+
+            if (loginType === 'user' && userRole === 'ADMIN') {
+                setError('Administrative accounts must log in via the Admin Portal.');
                 setLoading(false);
                 return;
             }
             
-            if (loginType === 'user' && data.role === 'admin') {
-                navigate('/');
-                return;
-            }
-            
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            localStorage.setItem('sessionStart', Date.now().toString());
-            
+            // Save to AuthContext and LocalStorage
+            login(data);
+
+            // Always navigate to homepage — contextual CTAs are shown there
             navigate('/');
         } catch (err) {
+            console.error('Login error:', err);
             setError(err.response?.data?.message || t('login.authFail'));
         } finally {
             setLoading(false);
@@ -139,7 +151,7 @@ const LoginPage = () => {
                                 <div className="flex gap-2 p-1.5 bg-[var(--theme-hover-surface)] rounded-xl mb-6">
                                     <button
                                         type="button"
-                                        onClick={() => { setLoginType('user'); setFormData({ email: '', password: '' }); setError(''); }}
+                                        onClick={() => { setLoginType('user'); setError(''); }}
                                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                             loginType === 'user'
                                                 ? 'bg-[var(--theme-accent-primary)] text-white shadow-md'
@@ -151,7 +163,7 @@ const LoginPage = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => { setLoginType('admin'); setFormData({ email: '', password: '' }); setError(''); }}
+                                        onClick={() => { setLoginType('admin'); setError(''); }}
                                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                             loginType === 'admin'
                                                 ? 'bg-[var(--theme-accent-gold)] text-white shadow-md'

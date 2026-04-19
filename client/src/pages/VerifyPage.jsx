@@ -27,12 +27,20 @@ const VerifyPage = () => {
         setSearchParams({ id: idToSearch });
 
         try {
-            await API.get(`/certificates/validate/${idToSearch}`);
-            setResult({ valid: true, cert: { certId: idToSearch }, downloaded: false });
+            // Correct endpoint: /certificates/verify/:id
+            const { data } = await API.get(`/certificates/verify/${idToSearch}`);
+            if (data.valid) {
+                setResult({ valid: true, cert: data.cert, downloaded: false });
+            } else {
+                setResult({
+                    valid: false,
+                    message: 'No certificate found with that ID. Please double-check and try again.'
+                });
+            }
         } catch (err) {
             setResult({
                 valid: false,
-                message: err.message || 'Certificate record could not be found.'
+                message: err.response?.data?.message || 'Certificate record could not be found.'
             });
         } finally {
             setLoading(false);
@@ -158,6 +166,18 @@ const VerifyPage = () => {
                                             <p className="font-mono text-sm font-bold text-on-surface">{result.cert.certId}</p>
                                         </div>
                                         <div className="bg-surface p-6">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Student Name</p>
+                                            <p className="font-body text-sm font-bold text-on-surface">{result.cert.name || '—'}</p>
+                                        </div>
+                                        <div className="bg-surface p-6">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Course / Domain</p>
+                                            <p className="font-body text-sm font-bold text-on-surface">{result.cert.course || '—'}</p>
+                                        </div>
+                                        <div className="bg-surface p-6">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Date Issued</p>
+                                            <p className="font-body text-sm font-bold text-on-surface">{result.cert.date || '—'}</p>
+                                        </div>
+                                        <div className="bg-surface p-6 md:col-span-2">
                                             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2">Validated By</p>
                                             <p className="font-body text-sm font-bold text-on-surface">CertiVerify Secure Protocol</p>
                                         </div>

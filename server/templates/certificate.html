@@ -362,103 +362,110 @@
     /* ── Bottom bar ───────────────────────────────────────── */
     .cert-bottom {
       border-top: 1px solid var(--border);
-      padding: 16px 48px;
+      padding: 14px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 24px;
       position: relative;
       z-index: 4;
       background: rgba(247,247,245,.98);
       flex-shrink: 0;
-      min-height: 100px;
+      min-height: 90px;
     }
 
     .details-group {
       display: flex;
-      gap: 48px;
+      gap: 36px;
       align-items: center;
-      flex: 1;
+      flex-shrink: 0;
     }
     .details-group > div {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      white-space: nowrap;
     }
     .detail-label {
       font-family: 'DM Sans', sans-serif;
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 500;
-      letter-spacing: 2.2px;
+      letter-spacing: 2px;
       color: var(--emerald-mid);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
+      white-space: nowrap;
     }
     .detail-value {
       font-family: 'Playfair Display', serif;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--ink);
+      white-space: nowrap;
     }
 
     .sigs-group {
       display: flex;
-      gap: 52px;
+      gap: 40px;
       align-items: flex-end;
       flex: 1;
+      justify-content: center;
     }
     .sig-block {
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 1;
     }
-    .sig-svg { width: 92px; height: 34px; margin-bottom: 4px; }
-    .sig-line { width: 110px; height: 1px; background: var(--ink); opacity: .28; margin-bottom: 4px; }
+    .sig-svg { width: 80px; height: 30px; margin-bottom: 3px; }
+    .sig-line { width: 100px; height: 1px; background: var(--ink); opacity: .28; margin-bottom: 3px; }
     .sig-label {
       font-family: 'DM Sans', sans-serif;
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 500;
-      letter-spacing: 1.8px;
+      letter-spacing: 1.5px;
       color: var(--ink-muted);
       text-transform: uppercase;
       text-align: center;
-      line-height: 1.3;
+      white-space: nowrap;
     }
     .sig-role {
       font-family: 'DM Sans', sans-serif;
-      font-size: 7px;
+      font-size: 6.5px;
       color: var(--ink-muted);
-      letter-spacing: 1.2px;
+      letter-spacing: 1px;
       text-transform: uppercase;
       opacity: .6;
       margin-top: 2px;
+      white-space: nowrap;
     }
 
-    /* ── QR Section ──────────────────────────────────────── */
-    .qr-box {
+    /* ── QR — top-right badge ────────────────────────────────── */
+    .qr-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      margin-left: 32px;
-      padding-left: 32px;
-      border-left: 1px solid rgba(17, 24, 39, 0.1);
+      background: rgba(247,247,245,0.96);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 8px 5px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.09);
     }
     .qr-img {
-      width: 60px;
-      height: 60px;
-      background: white;
-      padding: 2px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      width: 62px;
+      height: 62px;
+      display: block;
+      border-radius: 3px;
     }
     .qr-label {
       font-family: 'DM Sans', sans-serif;
-      font-size: 7px;
+      font-size: 6.5px;
       font-weight: 600;
-      letter-spacing: 1.2px;
-      color: var(--ink-muted);
+      letter-spacing: 1.4px;
+      color: var(--emerald-mid);
       text-transform: uppercase;
       margin-top: 5px;
       white-space: nowrap;
@@ -566,6 +573,12 @@
     <div class="cert-corner tl"></div>
     <div class="cert-corner bl"></div>
 
+    <!-- QR code: top-right corner badge -->
+    <div class="qr-badge">
+      <img src="{{qrCode}}" class="qr-img" alt="QR Verify" />
+      <div class="qr-label">Scan to Verify</div>
+    </div>
+
     <!-- Main text content -->
     <div class="cert-content-wrap">
 
@@ -625,7 +638,7 @@
               fill="none" stroke="#111827" stroke-width=".8" stroke-linecap="round" opacity=".2"/>
           </svg>
           <div class="sig-line"></div>
-          <div class="sig-label">Director, Training &amp; Dev.</div>
+          <div class="sig-label">Dir., Training &amp; Dev.</div>
           <div class="sig-role">AMDOX TECHNOLOGY</div>
         </div>
 
@@ -641,11 +654,6 @@
           <div class="sig-role">AMDOX TECHNOLOGY</div>
         </div>
 
-      </div>
-
-      <div class="qr-box">
-        <img src="{{qrCode}}" class="qr-img" alt="QR Verify" />
-        <div class="qr-label">Scan to Verify</div>
       </div>
 
     </div><!-- /cert-bottom -->

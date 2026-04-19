@@ -11,8 +11,12 @@ export const downloadCertificatePDF = (certId) => {
         baseUrl = `${window.location.protocol}//${baseUrl}`;
     }
 
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-    const token = userInfo.token;
+    if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.slice(0, -1);
+    }
+
+    // Token is stored at its own key by AuthContext (not inside userInfo)
+    const token = localStorage.getItem('token');
 
     let downloadUrl = `${baseUrl}/certificates/download/${certId}`;
     if (token) {

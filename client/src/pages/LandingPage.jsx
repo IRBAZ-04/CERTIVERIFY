@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
     const { t } = useTranslation();
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    const { user, isAdmin } = useAuth();
 
     return (
         <main>
@@ -21,20 +21,28 @@ const LandingPage = () => {
                         CertiVerify provides organizations and students with a reliable platform to securely issue, manage, and instantly authenticate digital certificates.
                     </p>
                     <div className="flex flex-wrap items-center gap-6 md:gap-8">
-                        {userInfo ? (
-                            <Link to="/verify" className="bg-primary-container text-on-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:opacity-90">
-                                Verify Certificate
-                            </Link>
+                        {user ? (
+                            <>
+                                <Link to="/verify" className="bg-primary-container text-on-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:opacity-90">
+                                    Verify Certificate
+                                </Link>
+                                {isAdmin && (
+                                    <Link to="/admin-dashboard" className="font-label text-[11px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 group">
+                                        Admin Dashboard
+                                        <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                    </Link>
+                                )}
+                            </>
                         ) : (
-                            <Link to="/login" className="bg-primary-container text-on-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:opacity-90">
-                                Sign In To Verify
-                            </Link>
-                        )}
-                        {!userInfo && (
-                            <Link to="/register" className="font-label text-[11px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 group">
-                                Create Free Account
-                                <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </Link>
+                            <>
+                                <Link to="/login" className="bg-primary-container text-on-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.15em] hover:opacity-90">
+                                    Sign In To Verify
+                                </Link>
+                                <Link to="/register" className="font-label text-[11px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 group">
+                                    Create Free Account
+                                    <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </Link>
+                            </>
                         )}
                     </div>
                 </div>
@@ -167,9 +175,27 @@ const LandingPage = () => {
                         Start managing certificates <span className="italic">properly today.</span>
                     </h2>
                     <div className="flex flex-col md:flex-row gap-4 justify-center">
-                        <Link to={userInfo ? "/verify" : "/login"} className="bg-white text-primary px-8 md:px-12 py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-surface-container-low transition-colors inline-block">
-                            {userInfo ? 'Go To Validation Portal' : 'Create Free Account'}
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link to="/verify" className="bg-white text-primary px-8 md:px-12 py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-surface-container-low transition-colors inline-block">
+                                    Go To Validation Portal
+                                </Link>
+                                {isAdmin && (
+                                    <Link to="/admin-dashboard" className="bg-transparent text-white border border-white/40 px-8 md:px-12 py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-colors inline-block">
+                                        Admin Dashboard
+                                    </Link>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/register" className="bg-white text-primary px-8 md:px-12 py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-surface-container-low transition-colors inline-block">
+                                    Create Free Account
+                                </Link>
+                                <Link to="/login" className="bg-transparent text-white border border-white/40 px-8 md:px-12 py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-colors inline-block">
+                                    Sign In
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
                 {/* Background Decoration */}

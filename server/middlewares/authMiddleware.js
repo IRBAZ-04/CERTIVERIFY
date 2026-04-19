@@ -21,8 +21,11 @@ const protect = (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-    if (req.user.role !== "admin") return res.status(403).json({ msg: "Forbidden" });
-    next();
+    if (req.user && req.user.role === "ADMIN") {
+        next();
+    } else {
+        return res.status(403).json({ msg: "Forbidden: Admin access required" });
+    }
 };
 
 module.exports = { protect, adminOnly };

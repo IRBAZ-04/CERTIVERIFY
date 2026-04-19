@@ -7,10 +7,12 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { login } = useAuth();
   const [registerType, setRegisterType] = useState('user');
   const [formData, setFormData] = useState({ 
     name: '', 
@@ -43,8 +45,9 @@ const RegisterPage = () => {
       };
       
       const { data } = await API.post('/auth/register', payload);
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      localStorage.setItem('sessionStart', Date.now().toString());
+      login(data);
+
+      // Always navigate to homepage after registration
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -165,7 +168,7 @@ const RegisterPage = () => {
 
                 {error && (
                   <div className="bg-[var(--theme-error-bg)] border border-[var(--theme-error-border)] text-[var(--theme-error-text)] text-sm p-4 rounded-xl mb-6 flex items-center gap-3">
-                    <ShieldCheck className="h-5 w-5 shrink-0" />
+                    <ShieldAlert className="h-5 w-5 shrink-0" />
                     {error}
                   </div>
                 )}

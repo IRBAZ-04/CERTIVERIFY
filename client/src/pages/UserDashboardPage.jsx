@@ -4,20 +4,21 @@ import { ShieldCheck, Search, Award } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const UserDashboardPage = () => {
   const navigate = useNavigate();
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
-    if (!userInfo?.token) {
+    if (!user) {
       navigate('/login');
       return;
     }
-    if (userInfo.role !== 'user') {
+    if (isAdmin) {
       navigate('/admin-dashboard');
     }
-  }, [navigate]);
+  }, [user, isAdmin, navigate]);
 
   return (
     <div className="min-h-[calc(100vh-8rem)] py-12 px-4 bg-[var(--theme-background)]">
@@ -30,7 +31,7 @@ const UserDashboardPage = () => {
           <div className="h-16 w-16 rounded-2xl bg-[var(--theme-accent-primary)] mx-auto mb-5 flex items-center justify-center shadow-sm">
             <Award className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[var(--theme-text-primary)]">Welcome, {userInfo?.name}</h1>
+          <h1 className="text-3xl font-bold text-[var(--theme-text-primary)]">Welcome, {user?.name} ({user?.role})</h1>
           <p className="text-[var(--theme-text-secondary)] mt-2">Access your certificate verification portal</p>
         </motion.div>
 
