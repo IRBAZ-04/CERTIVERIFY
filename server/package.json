@@ -1,6 +1,6 @@
 {
   "name": "certificate-verification-system-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend API for Certificate System",
   "main": "server.js",
   "scripts": {
@@ -16,6 +16,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
+    "is-odd": "^3.0.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.11.0",
     "morgan": "^1.10.1",
