@@ -238,10 +238,12 @@ const downloadCertificate = async (req, res) => {
 
         browser = await puppeteer.launch({
             headless: true,
+            executablePath: puppeteer.executablePath(), // ⭐ IMPORTANT FIX
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage'
+                '--disable-dev-shm-usage',
+                '--disable-gpu'
             ],
             timeout: 30000
         });
